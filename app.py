@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
 import plotly.graph_objects as go
+import folium
+from streamlit_folium import st_folium
 import qrcode
 from io import BytesIO
 
@@ -32,6 +33,14 @@ st.markdown("""
         border-radius: 8px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
+    .legend-box {
+        padding: 10px 14px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -42,6 +51,9 @@ st.markdown("""
 def cargar_datos():
     df_pac = pd.read_csv("MAPA_PACIENTES_ENRIQUECIDO.csv")
     df_mun = pd.read_csv("MAPA_MUNICIPIOS_RANKING.csv")
+    df_pac["LAT_DECIMAL"] = pd.to_numeric(df_pac["LAT_DECIMAL"], errors="coerce")
+    df_pac["LON_DECIMAL"] = pd.to_numeric(df_pac["LON_DECIMAL"], errors="coerce")
+    df_pac = df_pac.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
     return df_pac, df_mun
 
 try:
@@ -206,72 +218,67 @@ tab1, tab2, tab3 = st.tabs([
 ])
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 1: MAPA GPS Y RANKING DE MUNICIPIOS
+# PESTAÑA 1: MAPA GPS (FOLIUM INFALIBLE EN CELULAR Y LAPTOP) Y RANKING
 # ------------------------------------------------------------------------------
 with tab1:
     col_mapa, col_rank = st.columns([1.35, 1])
     
     with col_mapa:
         st.markdown("#### 📍 Georreferenciación de Pacientes por Cluster K-Means")
+        
+        # Leyenda clara arriba del mapa
+        st.markdown("""
+        <div class="legend-box">
+            <span style="color:#D90429; font-weight:bold;">● Cluster 0:</span> Alta Severidad Clínica (Ortopedia/Cuidador) &nbsp;|&nbsp;
+            <span style="color:#F77F00; font-weight:bold;">● Cluster 2:</span> Rural Entorno Crítico (U. Móviles) &nbsp;|&nbsp;
+            <span style="color:#2B9348; font-weight:bold;">● Cluster 1:</span> Urbano Moderado (Inclusión/Becas)
+        </div>
+        """, unsafe_allow_html=True)
+        
         colores_clusters = {
             "Cluster 0: Alta Severidad Clinica (Ortopedia/Cuidador)": "#D90429",
             "Cluster 2: Rural Entorno Critico (Unidades Moviles)": "#F77F00",
             "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#2B9348"
         }
         
-        zoom_nivel = 7.3 if mun_seleccionado == "Todo Guanajuato" else 10.2
-        
-        # Compatible tanto con Plotly 6+ (scatter_map) como con Plotly 5 (scatter_mapbox)
-        if hasattr(px, "scatter_map"):
-            fig_mapa = px.scatter_map(
-                df_p_f,
-                lat="LAT_DECIMAL",
-                lon="LON_DECIMAL",
-                color="PERFIL_CLUSTER",
-                color_discrete_map=colores_clusters,
-                hover_name="MUNICIPIO",
-                hover_data={
-                    "LOCALIDAD": True,
-                    "DIAGNOSTICO": True,
-                    "PCT_DISCAPACIDAD": True,
-                    "PROBABILIDAD_DEFICIT_IA": ":.1f",
-                    "LAT_DECIMAL": False,
-                    "LON_DECIMAL": False
-                },
-                zoom=zoom_nivel,
-                height=520
-            )
-            fig_mapa.update_layout(
-                map_style="carto-positron",
-                margin={"r":0,"t":10,"l":0,"b":0},
-                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, title=None)
-            )
+        if len(df_p_f) > 0:
+            lat_centro = float(df_p_f["LAT_DECIMAL"].mean())
+            lon_centro = float(df_p_f["LON_DECIMAL"].mean())
         else:
-            fig_mapa = px.scatter_mapbox(
-                df_p_f,
-                lat="LAT_DECIMAL",
-                lon="LON_DECIMAL",
-                color="PERFIL_CLUSTER",
-                color_discrete_map=colores_clusters,
-                hover_name="MUNICIPIO",
-                hover_data={
-                    "LOCALIDAD": True,
-                    "DIAGNOSTICO": True,
-                    "PCT_DISCAPACIDAD": True,
-                    "PROBABILIDAD_DEFICIT_IA": ":.1f",
-                    "LAT_DECIMAL": False,
-                    "LON_DECIMAL": False
-                },
-                zoom=zoom_nivel,
-                height=520
-            )
-            fig_mapa.update_layout(
-                mapbox_style="carto-positron",
-                margin={"r":0,"t":10,"l":0,"b":0},
-                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, title=None)
-            )
+            lat_centro, lon_centro = 21.0190, -101.2574
             
-        st.plotly_chart(fig_mapa, use_container_width=True)
+        zoom_nivel = 8 if mun_seleccionado == "Todo Guanajuato" else 11
+        
+        # Mapa Folium con OpenStreetMap (carga garantizada en cualquier celular y red)
+        m = folium.Map(
+            location=[lat_centro, lon_centro],
+            zoom_start=zoom_nivel,
+            tiles="OpenStreetMap",
+            control_scale=True
+        )
+        
+        for _, row in df_p_f.iterrows():
+            perfil = str(row["PERFIL_CLUSTER"])
+            color_punto = colores_clusters.get(perfil, "#0055A5")
+            tooltip_txt = (
+                f"<b>Municipio:</b> {row['MUNICIPIO']}<br>"
+                f"<b>Localidad:</b> {row['LOCALIDAD']}<br>"
+                f"<b>Cluster:</b> {perfil}<br>"
+                f"<b>Diagnóstico:</b> {row['DIAGNOSTICO']}<br>"
+                f"<b>Discapacidad:</b> {row['PCT_DISCAPACIDAD']}%<br>"
+                f"<b>Prob. Déficit IA:</b> {row['PROBABILIDAD_DEFICIT_IA']:.1f}%"
+            )
+            folium.CircleMarker(
+                location=[float(row["LAT_DECIMAL"]), float(row["LON_DECIMAL"])],
+                radius=5,
+                color=color_punto,
+                fill=True,
+                fill_color=color_punto,
+                fill_opacity=0.85,
+                tooltip=folium.Tooltip(tooltip_txt)
+            ).add_to(m)
+            
+        st_folium(m, use_container_width=True, height=480, returned_objects=[])
         
     with col_rank:
         st.markdown("#### 🚨 Top 10 Municipios en Foco Rojo (Índice M.A.P.A.)")
