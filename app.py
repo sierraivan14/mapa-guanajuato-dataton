@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import folium
 from streamlit_folium import st_folium
 from pathlib import Path
+import base64
 
 # ------------------------------------------------------------------
 # 0. PALETA INSTITUCIONAL (Azul Institucional Gobierno de Guanajuato)
@@ -25,6 +26,18 @@ def mostrar_imagen(ruta, **kwargs):
     """Muestra una imagen solo si existe, para que la app no falle si falta el archivo."""
     if Path(ruta).exists():
         st.image(str(ruta), **kwargs)
+
+
+def logo_fijo(ruta):
+    """Logo como imagen HTML (base64): no tiene el boton de pantalla completa de st.image."""
+    ruta = Path(ruta)
+    if not ruta.exists():
+        return ""
+    datos = base64.b64encode(ruta.read_bytes()).decode()
+    return (
+        "<img src='data:image/png;base64," + datos + "' "
+        "style='width:100%; pointer-events:none; user-select:none;' draggable='false'>"
+    )
 
 
 # 1. CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
@@ -64,7 +77,6 @@ except Exception as e:
 
 # 3. BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
 with st.sidebar:
-    mostrar_imagen(LOGO_PRINCIPAL, use_container_width=True)
     st.markdown("## Panel de Control M.A.P.A.")
     st.caption("Modelo Analitico de Prediccion y Asignacion - Guanajuato")
     
@@ -129,7 +141,7 @@ excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 col_logo, col_header = st.columns([1, 4], vertical_alignment="center")
 
 with col_logo:
-    mostrar_imagen(LOGO_PRINCIPAL, use_container_width=True)
+    st.markdown(logo_fijo(LOGO_PRINCIPAL), unsafe_allow_html=True)
 
 with col_header:
     header_html = (
