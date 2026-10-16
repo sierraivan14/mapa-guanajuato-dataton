@@ -7,29 +7,25 @@ from streamlit_folium import st_folium
 from pathlib import Path
 import base64
 
-# ------------------------------------------------------------------
-# 0. PALETA INSTITUCIONAL (Azul Institucional Gobierno de Guanajuato)
-# ------------------------------------------------------------------
-AZUL_INST = "#0082FF"        # RGB 0, 130, 255  (color principal)
-AZUL_INST_ALT = "#0066FF"    # variante mas profunda
-AZUL_OSCURO = "#00408F"      # tono oscuro derivado, para textos y degradados
-AZUL_CLARO = "#E6F2FF"       # tono muy claro derivado, para fondos suaves
+
+AZUL_INST = "#0082FF"
+AZUL_INST_ALT = "#0066FF"
+AZUL_OSCURO = "#00408F"
+AZUL_CLARO = "#E6F2FF"
 GRIS_BASE = "#B0BEC5"
 
-# Rutas de imagenes (carpeta assets/ junto a app.py en el repositorio)
+# Rutas de imagenes que estan dentro de la raiz
 BASE_DIR = Path(__file__).parent
-ASSETS = BASE_DIR  # el logo esta en la raiz del repo, junto a app.py
+ASSETS = BASE_DIR  
 LOGO_PRINCIPAL = ASSETS / "logo_derechos_humanos.png"
 
-
+# Esto es en caso de que no exista una imagen, no se rompa el programa
 def mostrar_imagen(ruta, **kwargs):
-    """Muestra una imagen solo si existe, para que la app no falle si falta el archivo."""
     if Path(ruta).exists():
         st.image(str(ruta), **kwargs)
 
-
+#Convierte la imagen en html para que no se pueda ampliar la imagen
 def logo_fijo(ruta):
-    """Logo como imagen HTML (base64): no tiene el boton de pantalla completa de st.image."""
     ruta = Path(ruta)
     if not ruta.exists():
         return ""
@@ -40,7 +36,7 @@ def logo_fijo(ruta):
     )
 
 
-# 1. CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
+# CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
 st.set_page_config(
     page_title="M.A.P.A. Guanajuato | Simulador IA",
     page_icon=str(LOGO_PRINCIPAL) if LOGO_PRINCIPAL.exists() else None,
@@ -59,7 +55,7 @@ css_style = (
 )
 st.markdown(css_style, unsafe_allow_html=True)
 
-# 2. CARGA DE DATOS
+# CARGA DE DATOS
 @st.cache_data
 def cargar_datos():
     df_pac = pd.read_csv("MAPA_PACIENTES_ENRIQUECIDO.csv")
@@ -75,7 +71,7 @@ except Exception as e:
     st.error("No se encontraron los archivos CSV en el repositorio.")
     st.stop()
 
-# 3. BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
+# BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
 with st.sidebar:
     st.markdown("## Panel de Control M.A.P.A.")
     st.caption("Modelo Analitico de Prediccion y Asignacion - Guanajuato")
@@ -86,7 +82,6 @@ with st.sidebar:
     min_evaluados = st.checkbox("Filtrar Ranking con >= 10 evaluados (Focos Rojos Oficiales)", value=True)
     
     st.markdown("---")
-    st.markdown("### Simulador What-If (Las 3 Palancas)")
     st.caption("Desliza el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
     
     slider_transporte = st.slider(
@@ -102,7 +97,7 @@ with st.sidebar:
         min_value=0, max_value=100, value=0, step=5
     )
 
-# 4. MOTOR MATEMATICO DEL SIMULADOR WHAT-IF
+# MOTOR MATEMATICO DEL SIMULADOR WHAT-IF
 if mun_seleccionado == "Todo Guanajuato":
     df_p_f = df_pac.copy()
     df_m_f = df_mun.copy()
@@ -137,7 +132,7 @@ factor_mitigacion_ia = (0.40 * (slider_transporte / 100.0)) + (0.35 * (slider_or
 tasa_exc_sim = tasa_exc_base * (1.0 - factor_mitigacion_ia)
 excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 
-# 5. ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
+# ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
 col_logo, col_header = st.columns([1, 4], vertical_alignment="center")
 
 with col_logo:
@@ -173,7 +168,7 @@ with c6:
 
 st.markdown("---")
 
-# 6. PESTANAS DE NAVEGACION
+# PESTANAS DE NAVEGACION
 tab1, tab2, tab3 = st.tabs([
     "Mapa GPS (Clusters IA) y Focos Rojos",
     "Licitacion Exacta de Ortopedia y Ayudas Tecnicas",
@@ -185,9 +180,7 @@ with tab1:
     
     with col_mapa:
         st.markdown("#### Georreferenciacion de Pacientes por Cluster K-Means")
-        
-        # Nota: los colores de los clusters se mantienen (rojo/naranja/verde)
-        # porque son semaforos de severidad y deben distinguirse del azul institucional.
+
         legend_html = (
             "<div class='legend-box'>"
             "<span style='color:#D90429; font-weight:bold;'>Cluster 0 (Rojo):</span> Alta Severidad Clinica (Ortopedia/Cuidador) | "
@@ -242,19 +235,19 @@ with tab1:
         st_folium(m, use_container_width=True, height=480, returned_objects=[])
         
     with col_rank:
-        st.markdown("#### Top 10 Municipios en Foco Rojo (Indice M.A.P.A.)")
+                st.markdown("#### Top 10 Municipios en Foco Rojo (Indice M.A.P.A.)")
         df_rank = df_mun.copy()
         if min_evaluados:
             df_rank = df_rank[df_rank["TOTAL_EVALUADOS"] >= 10]
-            
+
         df_rank["INDICE_SIMULADO"] = (
             0.40 * (df_rank["TASA_BARRERA_TRANSPORTE_PCT"] * (1.0 - slider_transporte / 100.0)) +
             0.35 * (df_rank["TASA_DEFICIT_TECNICO_PCT"] * (1.0 - slider_ortopedia / 100.0)) +
             0.25 * (df_rank["TASA_DEFICIT_APOYO_PCT"] * (1.0 - slider_apoyo / 100.0))
         )
-        
+
         top10 = df_rank.sort_values("INDICE_URGENCIA_MAPA", ascending=False).head(10).sort_values("INDICE_URGENCIA_MAPA", ascending=True)
-        
+
         fig_bar = go.Figure()
         fig_bar.add_trace(go.Bar(
             y=top10["MUNICIPIO"],
@@ -278,7 +271,18 @@ with tab1:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
             margin={"r": 10, "t": 30, "l": 10, "b": 10}
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        fig_bar.update_xaxes(fixedrange=True)
+        fig_bar.update_yaxes(fixedrange=True)
+
+        st.plotly_chart(
+            fig_bar,
+            use_container_width=True,
+            config={
+                "displaylogo": False,
+                "modeBarButtons": [["toImage"]],
+                "toImageButtonOptions": {"format": "png", "filename": "ranking_mapa", "scale": 2},
+            },
+        )
 
 with tab2:
     st.markdown("#### Cuadro de Adquisiciones Quirurgicas para Gobierno (Palanca 2)")
@@ -322,7 +326,7 @@ with tab3:
         hide_index=True
     )
 
-# 7. PIE DE PAGINA
+# PIE DE PAGINA
 st.markdown(
     "<div class='footer-box'><b>Gobierno del Estado de Guanajuato</b> | Secretaria de Derechos Humanos | M.A.P.A. 2024-2030</div>",
     unsafe_allow_html=True
