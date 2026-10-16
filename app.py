@@ -10,7 +10,7 @@ from io import BytesIO
 # 1. CONFIGURACIÓN DE LA PÁGINA Y ESTILO EJECUTIVO GOBIERNO GTO
 # ==============================================================================
 st.set_page_config(
-    page_title="M.A.P.A. Guanajuato | Simulador",
+    page_title="M.A.P.A. Guanajuato | Simulador IA",
     page_icon="📍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -18,21 +18,19 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    .main { background-color: #F4F7F9; }
     .header-box {
         background: linear-gradient(90deg, #003366 0%, #0055A5 100%);
         color: white;
         padding: 22px;
         border-radius: 12px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.18);
     }
     div[data-testid="stMetric"] {
-        background-color: #FFFFFF;
         border-left: 5px solid #0055A5;
-        padding: 15px;
+        padding: 12px;
         border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -49,14 +47,14 @@ def cargar_datos():
 try:
     df_pac, df_mun = cargar_datos()
 except Exception as e:
-    st.error("No se encontraron los archivos CSV. Asegúrate de que 'MAPA_PACIENTES_ENRIQUECIDO.csv' y 'MAPA_MUNICIPIOS_RANKING.csv' estén en la misma carpeta que 'app.py'.")
+    st.error("⚠️ No se encontraron los archivos CSV. Asegúrate de que 'MAPA_PACIENTES_ENRIQUECIDO.csv' y 'MAPA_MUNICIPIOS_RANKING.csv' estén en la misma carpeta que 'app.py'.")
     st.stop()
 
 # ==============================================================================
 # 3. BARRA LATERAL: FILTROS, SIMULADOR WHAT-IF (3 PALANCAS) Y CÓDIGO QR
 # ==============================================================================
 with st.sidebar:
-    st.markdown("##  Panel de Control M.A.P.A.")
+    st.markdown("## ⚙️ Panel de Control M.A.P.A.")
     st.caption("Modelo Analítico de Predicción y Asignación - Guanajuato")
     
     lista_municipios = ["Todo Guanajuato"] + sorted(df_mun["MUNICIPIO"].unique().tolist())
@@ -85,7 +83,7 @@ with st.sidebar:
     st.markdown("### 📱 Acceso QR para Jueces")
     url_app = st.text_input(
         "Pega aquí el link de tu App para generar el QR:",
-        value="https://mapa-guanajuato.streamlit.app"
+        value="https://mapa-gto-dataton.streamlit.app"
     )
     if url_app:
         qr = qrcode.QRCode(version=1, box_size=8, border=2)
@@ -221,122 +219,56 @@ with tab1:
             "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#2B9348"
         }
         
-        fig_mapa = px.scatter_mapbox(
-            df_p_f,
-            lat="LAT_DECIMAL",
-            lon="LON_DECIMAL",
-            color="PERFIL_CLUSTER",
-            color_discrete_map=colores_clusters,
-            hover_name="MUNICIPIO",
-            hover_data={
-                "LOCALIDAD": True,
-                "DIAGNOSTICO": True,
-                "PCT_DISCAPACIDAD": True,
-                "PROBABILIDAD_DEFICIT_IA": ":.1f",
-                "LAT_DECIMAL": False,
-                "LON_DECIMAL": False
-            },
-            zoom=7.3 if mun_seleccionado == "Todo Guanajuato" else 10.2,
-            height=520
-        )
-        fig_mapa.update_layout(
-            mapbox_style="carto-positron",
-            margin={"r":0,"t":10,"l":0,"b":0},
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.01,
-                xanchor="left",
-                x=0,
-                title=None
+        zoom_nivel = 7.3 if mun_seleccionado == "Todo Guanajuato" else 10.2
+        
+        # Compatible tanto con Plotly 6+ (scatter_map) como con Plotly 5 (scatter_mapbox)
+        if hasattr(px, "scatter_map"):
+            fig_mapa = px.scatter_map(
+                df_p_f,
+                lat="LAT_DECIMAL",
+                lon="LON_DECIMAL",
+                color="PERFIL_CLUSTER",
+                color_discrete_map=colores_clusters,
+                hover_name="MUNICIPIO",
+                hover_data={
+                    "LOCALIDAD": True,
+                    "DIAGNOSTICO": True,
+                    "PCT_DISCAPACIDAD": True,
+                    "PROBABILIDAD_DEFICIT_IA": ":.1f",
+                    "LAT_DECIMAL": False,
+                    "LON_DECIMAL": False
+                },
+                zoom=zoom_nivel,
+                height=520
             )
-        )
-        st.plotly_chart(fig_mapa, use_container_width=True)
-        
-    with col_rank:
-        st.markdown("#### 🚨 Top 10 Municipios en Foco Rojo (Índice M.A.P.A.)")
-        df_rank = df_mun.copy()
-        if min_evaluados:
-            df_rank = df_rank[df_rank["TOTAL_EVALUADOS"] >= 10]
+            fig_mapa.update_layout(
+                map_style="carto-positron",
+                margin={"r":0,"t":10,"l":0,"b":0},
+                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, title=None)
+            )
+        else:
+            fig_mapa = px.scatter_mapbox(
+                df_p_f,
+                lat="LAT_DECIMAL",
+                lon="LON_DECIMAL",
+                color="PERFIL_CLUSTER",
+                color_discrete_map=colores_clusters,
+                hover_name="MUNICIPIO",
+                hover_data={
+                    "LOCALIDAD": True,
+                    "DIAGNOSTICO": True,
+                    "PCT_DISCAPACIDAD": True,
+                    "PROBABILIDAD_DEFICIT_IA": ":.1f",
+                    "LAT_DECIMAL": False,
+                    "LON_DECIMAL": False
+                },
+                zoom=zoom_nivel,
+                height=520
+            )
+            fig_mapa.update_layout(
+                mapbox_style="carto-positron",
+                margin={"r":0,"t":10,"l":0,"b":0},
+                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, title=None)
+            )
             
-        # Recalcular Índice Simulado para cada municipio según Sliders
-        df_rank["INDICE_SIMULADO"] = (
-            0.40 * (df_rank["TASA_BARRERA_TRANSPORTE_PCT"] * (1.0 - slider_transporte / 100.0)) +
-            0.35 * (df_rank["TASA_DEFICIT_TECNICO_PCT"] * (1.0 - slider_ortopedia / 100.0)) +
-            0.25 * (df_rank["TASA_DEFICIT_APOYO_PCT"] * (1.0 - slider_apoyo / 100.0))
-        )
-        
-        top10 = df_rank.sort_values("INDICE_URGENCIA_MAPA", ascending=False).head(10).sort_values("INDICE_URGENCIA_MAPA", ascending=True)
-        
-        fig_bar = go.Figure()
-        fig_bar.add_trace(go.Bar(
-            y=top10["MUNICIPIO"],
-            x=top10["INDICE_URGENCIA_MAPA"],
-            name="Índice Base (Sin Intervención)",
-            orientation="h",
-            marker_color="#B0BEC5"
-        ))
-        fig_bar.add_trace(go.Bar(
-            y=top10["MUNICIPIO"],
-            x=top10["INDICE_SIMULADO"],
-            name="Índice Post-Inversión (Simulado)",
-            orientation="h",
-            marker_color="#D90429"
-        ))
-        fig_bar.update_layout(
-            barmode="overlay",
-            height=520,
-            xaxis_title="Índice de Urgencia M.A.P.A. (0 a 100)",
-            yaxis_title=None,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-            margin={"r":10,"t":30,"l":10,"b":10}
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-# ------------------------------------------------------------------------------
-# PESTAÑA 2: TABLA DE COMPRAS EXACTAS DE APARATOS ORTOPÉDICOS
-# ------------------------------------------------------------------------------
-with tab2:
-    st.markdown("#### 🛒 Cuadro de Adquisiciones Quirúrgicas para Gobierno (Palanca 2)")
-    
-    sillas_tot = int(df_p_f["FALTA_SILLA_RUEDAS"].sum())
-    bastones_tot = int(df_p_f["FALTA_BASTON"].sum())
-    andadores_tot = int(df_p_f["FALTA_ANDADOR"].sum())
-    protesis_tot = int(df_p_f["FALTA_PROTESIS"].sum())
-    audifonos_tot = int(df_p_f["FALTA_AUDIFONO"].sum())
-    
-    factor_orto = slider_ortopedia / 100.0
-    
-    k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("🦽 Sillas de Ruedas", f"{sillas_tot} req.", f"{int(round(sillas_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k2.metric("🦯 Bastones", f"{bastones_tot} req.", f"{int(round(bastones_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k3.metric("🚶 Andadores", f"{andadores_tot} req.", f"{int(round(andadores_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k4.metric("🦿 Prótesis / Órtesis", f"{protesis_tot} req.", f"{int(round(protesis_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k5.metric("🦻 Audífonos", f"{audifonos_tot} req.", f"{int(round(audifonos_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    
-    st.markdown("##### 📋 Desglose Exacto de Compras por Municipio")
-    cols_compras = [
-        "MUNICIPIO", "TOTAL_EVALUADOS", "INDICE_URGENCIA_MAPA", "TASA_EXCLUSION_PCT",
-        "TOTAL_SIN_AYUDA_TECNICA", "SILLAS_FALTANTES", "BASTONES_FALTANTES",
-        "ANDADORES_FALTANTES", "PROTESIS_FALTANTES", "AUDIFONOS_FALTANTES"
-    ]
-    tabla_compras = df_m_f[cols_compras].sort_values("TOTAL_SIN_AYUDA_TECNICA", ascending=False)
-    st.dataframe(tabla_compras, use_container_width=True, hide_index=True)
-
-# ------------------------------------------------------------------------------
-# PESTAÑA 3: EXPLORADOR DE PACIENTES Y SCORE RANDOM FOREST
-# ------------------------------------------------------------------------------
-with tab3:
-    st.markdown("#### 🤖 Padrón Nominal Priorizado por Random Forest (`PROBABILIDAD_DEFICIT_IA`)")
-    st.caption("Ordenado desde el paciente con mayor probabilidad de rezago crítico para despliegue inmediato de brigadas:")
-    
-    cols_pac = [
-        "ID_REGISTRO", "MUNICIPIO", "LOCALIDAD", "AMBITO", "EDAD", "SEXO",
-        "DIAGNOSTICO", "PCT_DISCAPACIDAD", "PERFIL_CLUSTER", "PROBABILIDAD_DEFICIT_IA",
-        "EXCLUIDO_LABORAL_EDUCATIVO", "BARRERA_TRANSPORTE", "DEFICIT_AYUDA_TECNICA", "DEFICIT_APOYO_Y_ENTORNO"
-    ]
-    st.dataframe(
-        df_p_f[cols_pac].sort_values("PROBABILIDAD_DEFICIT_IA", ascending=False),
-        use_container_width=True,
-        hide_index=True
-    )
+        st.plotly_chart(fig_mapa, use_container_width=True)
