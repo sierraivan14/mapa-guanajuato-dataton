@@ -4,19 +4,44 @@ import numpy as np
 import plotly.graph_objects as go
 import folium
 from streamlit_folium import st_folium
+from pathlib import Path
+
+# ------------------------------------------------------------------
+# 0. PALETA INSTITUCIONAL (Azul Institucional Gobierno de Guanajuato)
+# ------------------------------------------------------------------
+AZUL_INST = "#0082FF"        # RGB 0, 130, 255  (color principal)
+AZUL_INST_ALT = "#0066FF"    # variante mas profunda
+AZUL_OSCURO = "#00408F"      # tono oscuro derivado, para textos y degradados
+AZUL_CLARO = "#E6F2FF"       # tono muy claro derivado, para fondos suaves
+GRIS_BASE = "#B0BEC5"
+
+# Rutas de imagenes (carpeta assets/ junto a app.py en el repositorio)
+BASE_DIR = Path(__file__).parent
+ASSETS = BASE_DIR / "assets"
+LOGO_PRINCIPAL = ASSETS / "logo_derechos_humanos.png"
+
+
+def mostrar_imagen(ruta, **kwargs):
+    """Muestra una imagen solo si existe, para que la app no falle si falta el archivo."""
+    if Path(ruta).exists():
+        st.image(str(ruta), **kwargs)
+
 
 # 1. CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
 st.set_page_config(
     page_title="M.A.P.A. Guanajuato | Simulador IA",
+    page_icon=str(LOGO_PRINCIPAL) if LOGO_PRINCIPAL.exists() else None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 css_style = (
     "<style>"
-    ".header-box { background: linear-gradient(90deg, #003366 0%, #0055A5 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }"
-    "div[data-testid='stMetric'] { border-left: 5px solid #0055A5; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }"
-    ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(128, 128, 128, 0.25); margin-bottom: 10px; font-size: 14px; }"
+    ".header-box { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 55%, " + AZUL_INST + " 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,102,255,0.30); }"
+    "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); }"
+    ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
+    "h2, h3, h4 { color: " + AZUL_INST_ALT + "; }"
+    ".footer-box { text-align: center; padding: 14px; margin-top: 24px; border-top: 3px solid " + AZUL_INST + "; font-size: 13px; opacity: 0.85; }"
     "</style>"
 )
 st.markdown(css_style, unsafe_allow_html=True)
@@ -39,6 +64,7 @@ except Exception as e:
 
 # 3. BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
 with st.sidebar:
+    mostrar_imagen(LOGO_PRINCIPAL, use_container_width=True)
     st.markdown("## Panel de Control M.A.P.A.")
     st.caption("Modelo Analitico de Prediccion y Asignacion - Guanajuato")
     
@@ -99,15 +125,21 @@ factor_mitigacion_ia = (0.40 * (slider_transporte / 100.0)) + (0.35 * (slider_or
 tasa_exc_sim = tasa_exc_base * (1.0 - factor_mitigacion_ia)
 excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 
-# 5. ENCABEZADO Y TARJETAS KPI
-header_html = (
-    "<div class='header-box'>"
-    "<h1 style='margin:0; font-size: 28px;'>Sistema M.A.P.A. - Estado de Guanajuato</h1>"
-    "<p style='margin:5px 0 0 0; font-size: 16px; opacity: 0.92;'>"
-    "Modelo Analitico de Prediccion y Asignacion de Recursos para Personas con Discapacidad | <b>Territorio: " + str(mun_seleccionado) + "</b>"
-    "</p></div>"
-)
-st.markdown(header_html, unsafe_allow_html=True)
+# 5. ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
+col_logo, col_header = st.columns([1, 4], vertical_alignment="center")
+
+with col_logo:
+    mostrar_imagen(LOGO_PRINCIPAL, use_container_width=True)
+
+with col_header:
+    header_html = (
+        "<div class='header-box'>"
+        "<h1 style='margin:0; font-size: 28px; color: white;'>Sistema M.A.P.A. - Estado de Guanajuato</h1>"
+        "<p style='margin:5px 0 0 0; font-size: 16px; opacity: 0.95;'>"
+        "Modelo Analitico de Prediccion y Asignacion de Recursos para Personas con Discapacidad | <b>Territorio: " + str(mun_seleccionado) + "</b>"
+        "</p></div>"
+    )
+    st.markdown(header_html, unsafe_allow_html=True)
 
 st.subheader("Impacto Presupuestal Simulado: Antes vs. Despues de la Inversion")
 
@@ -142,6 +174,8 @@ with tab1:
     with col_mapa:
         st.markdown("#### Georreferenciacion de Pacientes por Cluster K-Means")
         
+        # Nota: los colores de los clusters se mantienen (rojo/naranja/verde)
+        # porque son semaforos de severidad y deben distinguirse del azul institucional.
         legend_html = (
             "<div class='legend-box'>"
             "<span style='color:#D90429; font-weight:bold;'>Cluster 0 (Rojo):</span> Alta Severidad Clinica (Ortopedia/Cuidador) | "
@@ -174,7 +208,7 @@ with tab1:
         
         for _, row in df_p_f.iterrows():
             perfil = str(row["PERFIL_CLUSTER"])
-            color_punto = colores_clusters.get(perfil, "#0055A5")
+            color_punto = colores_clusters.get(perfil, AZUL_INST_ALT)
             tooltip_txt = (
                 "<b>Municipio:</b> " + str(row["MUNICIPIO"]) + "<br>"
                 "<b>Localidad:</b> " + str(row["LOCALIDAD"]) + "<br>"
@@ -215,14 +249,14 @@ with tab1:
             x=top10["INDICE_URGENCIA_MAPA"],
             name="Indice Base (Sin Intervencion)",
             orientation="h",
-            marker_color="#B0BEC5"
+            marker_color=GRIS_BASE
         ))
         fig_bar.add_trace(go.Bar(
             y=top10["MUNICIPIO"],
             x=top10["INDICE_SIMULADO"],
             name="Indice Post-Inversion (Simulado)",
             orientation="h",
-            marker_color="#D90429"
+            marker_color=AZUL_INST
         ))
         fig_bar.update_layout(
             barmode="overlay",
@@ -275,3 +309,9 @@ with tab3:
         use_container_width=True,
         hide_index=True
     )
+
+# 7. PIE DE PAGINA
+st.markdown(
+    "<div class='footer-box'><b>Gobierno del Estado de Guanajuato</b> | Secretaria de Derechos Humanos | M.A.P.A. 2024-2030</div>",
+    unsafe_allow_html=True
+)
