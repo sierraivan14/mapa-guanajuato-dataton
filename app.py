@@ -272,3 +272,91 @@ with tab1:
             )
             
         st.plotly_chart(fig_mapa, use_container_width=True)
+        
+    with col_rank:
+        st.markdown("#### 🚨 Top 10 Municipios en Foco Rojo (Índice M.A.P.A.)")
+        df_rank = df_mun.copy()
+        if min_evaluados:
+            df_rank = df_rank[df_rank["TOTAL_EVALUADOS"] >= 10]
+            
+        # Recalcular Índice Simulado para cada municipio según Sliders
+        df_rank["INDICE_SIMULADO"] = (
+            0.40 * (df_rank["TASA_BARRERA_TRANSPORTE_PCT"] * (1.0 - slider_transporte / 100.0)) +
+            0.35 * (df_rank["TASA_DEFICIT_TECNICO_PCT"] * (1.0 - slider_ortopedia / 100.0)) +
+            0.25 * (df_rank["TASA_DEFICIT_APOYO_PCT"] * (1.0 - slider_apoyo / 100.0))
+        )
+        
+        top10 = df_rank.sort_values("INDICE_URGENCIA_MAPA", ascending=False).head(10).sort_values("INDICE_URGENCIA_MAPA", ascending=True)
+        
+        fig_bar = go.Figure()
+        fig_bar.add_trace(go.Bar(
+            y=top10["MUNICIPIO"],
+            x=top10["INDICE_URGENCIA_MAPA"],
+            name="Índice Base (Sin Intervención)",
+            orientation="h",
+            marker_color="#B0BEC5"
+        ))
+        fig_bar.add_trace(go.Bar(
+            y=top10["MUNICIPIO"],
+            x=top10["INDICE_SIMULADO"],
+            name="Índice Post-Inversión (Simulado)",
+            orientation="h",
+            marker_color="#D90429"
+        ))
+        fig_bar.update_layout(
+            barmode="overlay",
+            height=520,
+            xaxis_title="Índice de Urgencia M.A.P.A. (0 a 100)",
+            yaxis_title=None,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+            margin={"r":10,"t":30,"l":10,"b":10}
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+# ------------------------------------------------------------------------------
+# PESTAÑA 2: TABLA DE COMPRAS EXACTAS DE APARATOS ORTOPÉDICOS
+# ------------------------------------------------------------------------------
+with tab2:
+    st.markdown("#### 🛒 Cuadro de Adquisiciones Quirúrgicas para Gobierno (Palanca 2)")
+    
+    sillas_tot = int(df_p_f["FALTA_SILLA_RUEDAS"].sum())
+    bastones_tot = int(df_p_f["FALTA_BASTON"].sum())
+    andadores_tot = int(df_p_f["FALTA_ANDADOR"].sum())
+    protesis_tot = int(df_p_f["FALTA_PROTESIS"].sum())
+    audifonos_tot = int(df_p_f["FALTA_AUDIFONO"].sum())
+    
+    factor_orto = slider_ortopedia / 100.0
+    
+    k1, k2, k3, k4, k5 = st.columns(5)
+    k1.metric("🦽 Sillas de Ruedas", f"{sillas_tot} req.", f"{int(round(sillas_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
+    k2.metric("🦯 Bastones", f"{bastones_tot} req.", f"{int(round(bastones_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
+    k3.metric("🚶 Andadores", f"{andadores_tot} req.", f"{int(round(andadores_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
+    k4.metric("🦿 Prótesis / Órtesis", f"{protesis_tot} req.", f"{int(round(protesis_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
+    k5.metric("🦻 Audífonos", f"{audifonos_tot} req.", f"{int(round(audifonos_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
+    
+    st.markdown("##### 📋 Desglose Exacto de Compras por Municipio")
+    cols_compras = [
+        "MUNICIPIO", "TOTAL_EVALUADOS", "INDICE_URGENCIA_MAPA", "TASA_EXCLUSION_PCT",
+        "TOTAL_SIN_AYUDA_TECNICA", "SILLAS_FALTANTES", "BASTONES_FALTANTES",
+        "ANDADORES_FALTANTES", "PROTESIS_FALTANTES", "AUDIFONOS_FALTANTES"
+    ]
+    tabla_compras = df_m_f[cols_compras].sort_values("TOTAL_SIN_AYUDA_TECNICA", ascending=False)
+    st.dataframe(tabla_compras, use_container_width=True, hide_index=True)
+
+# ------------------------------------------------------------------------------
+# PESTAÑA 3: EXPLORADOR DE PACIENTES Y SCORE RANDOM FOREST
+# ------------------------------------------------------------------------------
+with tab3:
+    st.markdown("#### 🤖 Padrón Nominal Priorizado por Random Forest (`PROBABILIDAD_DEFICIT_IA`)")
+    st.caption("Ordenado desde el paciente con mayor probabilidad de rezago crítico para despliegue inmediato de brigadas:")
+    
+    cols_pac = [
+        "ID_REGISTRO", "MUNICIPIO", "LOCALIDAD", "AMBITO", "EDAD", "SEXO",
+        "DIAGNOSTICO", "PCT_DISCAPACIDAD", "PERFIL_CLUSTER", "PROBABILIDAD_DEFICIT_IA",
+        "EXCLUIDO_LABORAL_EDUCATIVO", "BARRERA_TRANSPORTE", "DEFICIT_AYUDA_TECNICA", "DEFICIT_APOYO_Y_ENTORNO"
+    ]
+    st.dataframe(
+        df_p_f[cols_pac].sort_values("PROBABILIDAD_DEFICIT_IA", ascending=False),
+        use_container_width=True,
+        hide_index=True
+    )
