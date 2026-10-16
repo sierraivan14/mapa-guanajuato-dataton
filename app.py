@@ -17,7 +17,7 @@ GRIS_BASE = "#B0BEC5"
 
 # Rutas de imagenes (carpeta assets/ junto a app.py en el repositorio)
 BASE_DIR = Path(__file__).parent
-ASSETS = BASE_DIR / "assets"
+ASSETS = BASE_DIR  # el logo esta en la raiz del repo, junto a app.py
 LOGO_PRINCIPAL = ASSETS / "logo_derechos_humanos.png"
 
 
