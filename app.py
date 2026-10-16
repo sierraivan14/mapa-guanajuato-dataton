@@ -235,7 +235,7 @@ with tab1:
         st_folium(m, use_container_width=True, height=480, returned_objects=[])
         
     with col_rank:
-                st.markdown("#### Top 10 Municipios en Foco Rojo (Indice M.A.P.A.)")
+        st.markdown("#### Top 10 Municipios en Foco Rojo (Indice M.A.P.A.)")
         df_rank = df_mun.copy()
         if min_evaluados:
             df_rank = df_rank[df_rank["TOTAL_EVALUADOS"] >= 10]
