@@ -81,7 +81,6 @@ with st.sidebar:
     
     min_evaluados = st.checkbox("Filtrar Ranking con >= 10 evaluados (Focos Rojos Oficiales)", value=True)
     
-    st.markdown("---")
     st.caption("Desliza el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
     
     slider_transporte = st.slider(
