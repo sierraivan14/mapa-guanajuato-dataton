@@ -85,15 +85,15 @@ with st.sidebar:
     
     slider_transporte = st.slider(
         "Palanca 1: Transporte Adaptado y U. Moviles (%)",
-        min_value=0, max_value=100, value=0, step=5
+        min_value=0, max_value=100, value=0, step=1
     )
     slider_ortopedia = st.slider(
         "Palanca 2: Entrega de Ayudas Tecnicas / Ortopedia (%)",
-        min_value=0, max_value=100, value=0, step=5
+        min_value=0, max_value=100, value=0, step=1
     )
     slider_apoyo = st.slider(
         "Palanca 3: Apoyo al Cuidador y Accesibilidad (%)",
-        min_value=0, max_value=100, value=0, step=5
+        min_value=0, max_value=100, value=0, step=1
     )
 
 # MOTOR MATEMATICO DEL SIMULADOR WHAT-IF
