@@ -83,15 +83,15 @@ with st.sidebar:
     
     st.caption("Desliza el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
     
-    slider_transporte = st.slider(
+    slider_transporte = st.number_input(
         "Palanca 1: Transporte Adaptado y U. Moviles (%)",
         min_value=0, max_value=100, value=0, step=1
     )
-    slider_ortopedia = st.slider(
+    slider_ortopedia = st.number_input(
         "Palanca 2: Entrega de Ayudas Tecnicas / Ortopedia (%)",
         min_value=0, max_value=100, value=0, step=1
     )
-    slider_apoyo = st.slider(
+    slider_apoyo = st.number_input(
         "Palanca 3: Apoyo al Cuidador y Accesibilidad (%)",
         min_value=0, max_value=100, value=0, step=1
     )
@@ -284,7 +284,7 @@ with tab1:
         )
 
 with tab2:
-    st.markdown("#### Cuadro de Adquisiciones Quirurgicas para Gobierno (Palanca 2)")
+    st.markdown("#### Cuadro de Adquisiciones Quirurgicas para Gobierno")
     
     sillas_tot = int(df_p_f["FALTA_SILLA_RUEDAS"].sum())
     bastones_tot = int(df_p_f["FALTA_BASTON"].sum())
@@ -311,7 +311,7 @@ with tab2:
     st.dataframe(tabla_compras, use_container_width=True, hide_index=True)
 
 with tab3:
-    st.markdown("#### Padron Nominal Priorizado por Random Forest (PROBABILIDAD_DEFICIT_IA)")
+    st.markdown("#### Padron Nominal Priorizado por Random Forest")
     st.caption("Ordenado desde el paciente con mayor probabilidad de rezago critico para despliegue inmediato de brigadas:")
     
     cols_pac = [
