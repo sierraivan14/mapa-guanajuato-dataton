@@ -41,7 +41,7 @@ st.set_page_config(
     page_title="M.A.P.A. Guanajuato | Simulador IA",
     page_icon=str(LOGO_PRINCIPAL) if LOGO_PRINCIPAL.exists() else None,
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 css_style = (
