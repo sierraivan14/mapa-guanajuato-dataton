@@ -81,7 +81,7 @@ with st.sidebar:
     
     min_evaluados = st.checkbox("Filtrar Ranking con >= 10 evaluados (Focos Rojos Oficiales)", value=True)
     
-    st.caption("Desliza el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
+    st.caption("Seleccione el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
     
     slider_transporte = st.number_input(
         "Palanca 1: Transporte Adaptado y U. Moviles (%)",
@@ -149,7 +149,17 @@ with col_header:
 
 st.subheader("Impacto Presupuestal Simulado: Antes vs. Despues de la Inversion")
 
-c1, c2, c3, c4, c5, c6 = st.columns(6)
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.metric("Poblacion Evaluada", f"{total_eval:,}", "100% Cobertura SIDIS")
+with c2:
+    delta_ind = indice_urgencia_sim - indice_urgencia_base
+    st.metric("Indice Urgencia M.A.P.A.", f"{indice_urgencia_sim:.2f} pts", f"{delta_ind:.2f} pts (Base: {indice_urgencia_base:.2f})", delta_color="inverse")
+with c3:
+    delta_exc = tasa_exc_sim - tasa_exc_base
+    st.metric("Tasa de Exclusion", f"{tasa_exc_sim:.1f}%", f"{delta_exc:.1f}% ({excluidos_rescatados} reinsertados)", delta_color="inverse")
+
+c4, c5, c6 = st.columns(3)
 with c1:
     st.metric("Poblacion Evaluada", f"{total_eval:,}", "100% Cobertura SIDIS")
 with c2:
