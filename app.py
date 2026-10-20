@@ -160,14 +160,6 @@ with c3:
     st.metric("Tasa de Exclusion", f"{tasa_exc_sim:.1f}%", f"{delta_exc:.1f}% ({excluidos_rescatados} reinsertados)", delta_color="inverse")
 
 c4, c5, c6 = st.columns(3)
-with c1:
-    st.metric("Poblacion Evaluada", f"{total_eval:,}", "100% Cobertura SIDIS")
-with c2:
-    delta_ind = indice_urgencia_sim - indice_urgencia_base
-    st.metric("Indice Urgencia M.A.P.A.", f"{indice_urgencia_sim:.2f} pts", f"{delta_ind:.2f} pts (Base: {indice_urgencia_base:.2f})", delta_color="inverse")
-with c3:
-    delta_exc = tasa_exc_sim - tasa_exc_base
-    st.metric("Tasa de Exclusion", f"{tasa_exc_sim:.1f}%", f"{delta_exc:.1f}% ({excluidos_rescatados} reinsertados)", delta_color="inverse")
 with c4:
     st.metric("Barrera Transporte (P1)", f"{tot_transporte - rescatados_transporte:,} pac.", f"-{rescatados_transporte} rescatados (Base: {tot_transporte})", delta_color="inverse")
 with c5:
