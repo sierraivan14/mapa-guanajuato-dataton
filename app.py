@@ -7,7 +7,6 @@ from streamlit_folium import st_folium
 from pathlib import Path
 import base64
 
-
 AZUL_INST = "#0082FF"
 AZUL_INST_ALT = "#0066FF"
 AZUL_OSCURO = "#00408F"
@@ -65,15 +64,11 @@ def cargar_datos():
     df_pac["LAT_DECIMAL"] = pd.to_numeric(df_pac["LAT_DECIMAL"], errors="coerce")
     df_pac["LON_DECIMAL"] = pd.to_numeric(df_pac["LON_DECIMAL"], errors="coerce")
 
-    # Crear el df exclusivo para el mapa SIN alterar el df_pac original
-    df_mapa = df_pac.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
-
-    # Retornamos los TRES dataframes
-    return df_pac, df_mapa, df_mun
+    return df_pac, df_mun
 
 try:
-    # Recibimos los tres dataframes al llamar la función
-    df_pac, df_mapa, df_mun = cargar_datos()
+    # Recibimos los dataframes
+    df_pac, df_mun = cargar_datos()
 except Exception as e:
     st.error("No se encontraron los archivos CSV en el repositorio.")
     st.stop()
@@ -204,9 +199,12 @@ with tab1:
             "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#2B9348"
         }
         
-        if len(df_p_f) > 0:
-            lat_centro = float(df_p_f["LAT_DECIMAL"].mean())
-            lon_centro = float(df_p_f["LON_DECIMAL"].mean())
+        # AQUI CREAMOS EL FILTRO EXCLUSIVO PARA EL MAPA
+        df_mapa_local = df_p_f.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
+        
+        if len(df_mapa_local) > 0:
+            lat_centro = float(df_mapa_local["LAT_DECIMAL"].mean())
+            lon_centro = float(df_mapa_local["LON_DECIMAL"].mean())
         else:
             lat_centro, lon_centro = 21.0190, -101.2574
             
@@ -219,7 +217,8 @@ with tab1:
             control_scale=True
         )
         
-        for _, row in df_p_f.iterrows():
+        # ITERAMOS SOBRE df_mapa_local EN VEZ DE df_p_f
+        for _, row in df_mapa_local.iterrows():
             perfil = str(row["PERFIL_CLUSTER"])
             color_punto = colores_clusters.get(perfil, AZUL_INST_ALT)
             tooltip_txt = (
