@@ -60,13 +60,20 @@ st.markdown(css_style, unsafe_allow_html=True)
 def cargar_datos():
     df_pac = pd.read_csv("MAPA_PACIENTES_ENRIQUECIDO.csv")
     df_mun = pd.read_csv("MAPA_MUNICIPIOS_RANKING.csv")
+    
+    # Asegurar que sean números
     df_pac["LAT_DECIMAL"] = pd.to_numeric(df_pac["LAT_DECIMAL"], errors="coerce")
     df_pac["LON_DECIMAL"] = pd.to_numeric(df_pac["LON_DECIMAL"], errors="coerce")
-    df_pac = df_pac.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
-    return df_pac, df_mun
+
+    # Crear el df exclusivo para el mapa SIN alterar el df_pac original
+    df_mapa = df_pac.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
+
+    # Retornamos los TRES dataframes
+    return df_pac, df_mapa, df_mun
 
 try:
-    df_pac, df_mun = cargar_datos()
+    # Recibimos los tres dataframes al llamar la función
+    df_pac, df_mapa, df_mun = cargar_datos()
 except Exception as e:
     st.error("No se encontraron los archivos CSV en el repositorio.")
     st.stop()
