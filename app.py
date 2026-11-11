@@ -7,11 +7,13 @@ from streamlit_folium import st_folium
 from pathlib import Path
 import base64
 
-AZUL_INST = "#0082FF"
-AZUL_INST_ALT = "#0066FF"
-AZUL_OSCURO = "#00408F"
-AZUL_CLARO = "#E6F2FF"
-GRIS_BASE = "#B0BEC5"
+# Colores actualizados para un aspecto más moderno y menos saturado
+AZUL_INST = "#1A73E8"      # Azul estilo Material/Google
+AZUL_INST_ALT = "#1967D2"
+AZUL_OSCURO = "#0D47A1"
+AZUL_CLARO = "#E8F0FE"
+GRIS_BASE = "#D1D5DB"      # Gris más suave para gráficas
+GRIS_FONDO = "#F3F4F6"     # Fondo principal de la app
 
 # Rutas de imagenes que estan dentro de la raiz
 BASE_DIR = Path(__file__).parent
@@ -31,9 +33,8 @@ def logo_fijo(ruta):
     datos = base64.b64encode(ruta.read_bytes()).decode()
     return (
         "<img src='data:image/png;base64," + datos + "' "
-        "style='width:100%; pointer-events:none; user-select:none;' draggable='false'>"
+        "style='width:100%; max-width: 180px; pointer-events:none; user-select:none;' draggable='false'>"
     )
-
 
 # CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
 st.set_page_config(
@@ -43,13 +44,99 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
+# BLOQUE CSS MODIFICADO (UI/UX)
 css_style = (
     "<style>"
-    ".header-box { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 55%, " + AZUL_INST + " 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,102,255,0.30); }"
-    "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); }"
-    ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
-    "h2, h3, h4 { color: " + AZUL_INST_ALT + "; }"
-    ".footer-box { text-align: center; padding: 14px; margin-top: 24px; border-top: 3px solid " + AZUL_INST + "; font-size: 13px; opacity: 0.85; }"
+    /* Importar fuente moderna (opcional, pero mejora el aspecto) */
+    "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');"
+    
+    /* Aplicar tipografía y fondo general */
+    "html, body, [class*='css'] { font-family: 'Inter', sans-serif; }"
+    ".stApp { background-color: " + GRIS_FONDO + "; }"
+    
+    /* Fondo del sidebar para diferenciarlo del contenido principal */
+    "[data-testid='stSidebar'] { background-color: #ffffff; border-right: 1px solid #E5E7EB; }"
+    
+    /* Diseño del Banner de Encabezado */
+    ".header-box { "
+    "   background: linear-gradient(135deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST + " 100%); "
+    "   color: white; "
+    "   padding: 24px 30px; "
+    "   border-radius: 12px; "
+    "   margin-bottom: 24px; "
+    "   box-shadow: 0 10px 15px -3px rgba(26, 115, 232, 0.2), 0 4px 6px -2px rgba(26, 115, 232, 0.1); "
+    "}"
+    ".header-box h1 { font-weight: 700; letter-spacing: -0.5px; }"
+    
+    /* Diseño moderno de las Tarjetas de Métricas (KPIs) */
+    "div[data-testid='metric-container'] { "
+    "   background-color: #ffffff; "
+    "   padding: 16px 20px; "
+    "   border-radius: 10px; "
+    "   border: 1px solid #E5E7EB; "
+    "   border-left: 6px solid " + AZUL_INST + "; "
+    "   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); "
+    "   transition: transform 0.2s ease, box-shadow 0.2s ease; "
+    "}"
+    "div[data-testid='metric-container']:hover { "
+    "   transform: translateY(-2px); "
+    "   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); "
+    "}"
+    
+    /* Títulos dentro de las tarjetas (más sutiles) */
+    "div[data-testid='metric-container'] label { "
+    "   color: #6B7280; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.02em; "
+    "}"
+    
+    /* Caja de Leyenda del Mapa */
+    ".legend-box { "
+    "   padding: 12px 16px; "
+    "   border-radius: 8px; "
+    "   background-color: #ffffff; "
+    "   border: 1px solid #E5E7EB; "
+    "   box-shadow: 0 1px 3px rgba(0,0,0,0.05); "
+    "   margin-bottom: 15px; "
+    "   font-size: 13px; "
+    "   color: #374151; "
+    "}"
+    
+    /* Estilos de encabezados secundarios */
+    "h2, h3, h4 { color: #111827; font-weight: 600; }"
+    "h3 { margin-bottom: 1rem; }"
+    
+    /* Modificar los Tabs de navegación */
+    ".stTabs [data-baseweb='tab-list'] { gap: 8px; }"
+    ".stTabs [data-baseweb='tab'] { "
+    "   background-color: #ffffff; "
+    "   border-radius: 8px 8px 0 0; "
+    "   padding: 10px 16px; "
+    "   border: 1px solid transparent; "
+    "}"
+    ".stTabs [aria-selected='true'] { "
+    "   background-color: #ffffff; "
+    "   border-color: #E5E7EB; "
+    "   border-bottom-color: #ffffff; "
+    "   color: " + AZUL_INST + "; font-weight: 600; "
+    "}"
+    
+    /* Contenedores de Dataframes/Gráficos con fondo blanco */
+    "[data-testid='stDataFrame'], [data-testid='stPlotlyChart'] { "
+    "   background-color: #ffffff; "
+    "   padding: 10px; "
+    "   border-radius: 10px; "
+    "   box-shadow: 0 1px 3px rgba(0,0,0,0.05); "
+    "   border: 1px solid #E5E7EB; "
+    "}"
+    
+    /* Pie de página */
+    ".footer-box { "
+    "   text-align: center; "
+    "   padding: 20px; "
+    "   margin-top: 40px; "
+    "   border-top: 1px solid #E5E7EB; "
+    "   color: #6B7280; "
+    "   font-size: 13px; "
+    "}"
     "</style>"
 )
 st.markdown(css_style, unsafe_allow_html=True)
@@ -75,26 +162,29 @@ except Exception as e:
 
 # BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
 with st.sidebar:
-    st.markdown("## Panel de Control M.A.P.A.")
-    st.caption("Modelo Analitico de Prediccion y Asignacion - Guanajuato")
+    st.markdown("## Panel de Control")
+    st.caption("M.A.P.A. Guanajuato")
+    st.divider() # Línea divisoria sutil
     
     lista_municipios = ["Todo Guanajuato"] + sorted(df_mun["MUNICIPIO"].unique().tolist())
     mun_seleccionado = st.selectbox("Filtrar Territorio:", lista_municipios)
     
-    min_evaluados = st.checkbox("Filtrar Ranking con >= 10 evaluados (Focos Rojos Oficiales)", value=True)
+    min_evaluados = st.checkbox("Filtrar Ranking con >= 10 evaluados (Focos Rojos)", value=True)
     
-    st.caption("Seleccione el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
+    st.divider()
+    st.markdown("#### Simulador de Presupuesto")
+    st.caption("Seleccione el porcentaje de cobertura para simular el impacto:")
     
     slider_transporte = st.number_input(
-        "Palanca 1: Transporte Adaptado y U. Moviles (%)",
+        "Palanca 1: Transporte y U. Moviles (%)",
         min_value=0, max_value=100, value=0, step=1
     )
     slider_ortopedia = st.number_input(
-        "Palanca 2: Entrega de Ayudas Tecnicas / Ortopedia (%)",
+        "Palanca 2: Ayudas Tecnicas/Ortopedia (%)",
         min_value=0, max_value=100, value=0, step=1
     )
     slider_apoyo = st.number_input(
-        "Palanca 3: Apoyo al Cuidador y Accesibilidad (%)",
+        "Palanca 3: Apoyo a Cuidador (%)",
         min_value=0, max_value=100, value=0, step=1
     )
 
@@ -134,7 +224,7 @@ tasa_exc_sim = tasa_exc_base * (1.0 - factor_mitigacion_ia)
 excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 
 # ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
-col_logo, col_header = st.columns([1, 4], vertical_alignment="center")
+col_logo, col_header = st.columns([1, 5], vertical_alignment="center")
 
 with col_logo:
     st.markdown(logo_fijo(LOGO_PRINCIPAL), unsafe_allow_html=True)
@@ -142,61 +232,64 @@ with col_logo:
 with col_header:
     header_html = (
         "<div class='header-box'>"
-        "<h1 style='margin:0; font-size: 28px; color: white;'>Sistema M.A.P.A. - Estado de Guanajuato</h1>"
-        "<p style='margin:5px 0 0 0; font-size: 16px; opacity: 0.95;'>"
-        "Modelo Analitico de Prediccion y Asignacion de Recursos para Personas con Discapacidad | <b>Territorio: " + str(mun_seleccionado) + "</b>"
+        "<h1 style='margin:0; font-size: 32px; color: white;'>Sistema M.A.P.A.</h1>"
+        "<p style='margin:8px 0 0 0; font-size: 15px; opacity: 0.90; font-weight: 300;'>"
+        "Modelo Analítico de Predicción y Asignación de Recursos | <b>Territorio: " + str(mun_seleccionado) + "</b>"
         "</p></div>"
     )
     st.markdown(header_html, unsafe_allow_html=True)
 
-st.subheader("Impacto Presupuestal Simulado: Antes vs. Despues de la Inversion")
+st.markdown("### Impacto Presupuestal Simulado")
 
 c1, c2, c3 = st.columns(3)
 with c1:
-    st.metric("Poblacion Evaluada", f"{total_eval:,}", "100% Cobertura SIDIS")
+    st.metric("Población Evaluada", f"{total_eval:,}", "100% Cobertura SIDIS")
 with c2:
     delta_ind = indice_urgencia_sim - indice_urgencia_base
-    st.metric("Indice Urgencia M.A.P.A.", f"{indice_urgencia_sim:.2f} pts", f"{delta_ind:.2f} pts (Base: {indice_urgencia_base:.2f})", delta_color="inverse")
+    st.metric("Índice Urgencia M.A.P.A.", f"{indice_urgencia_sim:.2f} pts", f"{delta_ind:.2f} pts (Base: {indice_urgencia_base:.2f})", delta_color="inverse")
 with c3:
     delta_exc = tasa_exc_sim - tasa_exc_base
-    st.metric("Tasa de Exclusion", f"{tasa_exc_sim:.1f}%", f"{delta_exc:.1f}% ({excluidos_rescatados} reinsertados)", delta_color="inverse")
+    st.metric("Tasa de Exclusión", f"{tasa_exc_sim:.1f}%", f"{delta_exc:.1f}% ({excluidos_rescatados} reinsertados)", delta_color="inverse")
+
+st.markdown("<br>", unsafe_allow_html=True) # Espacio sutil entre filas de KPIs
 
 c4, c5, c6 = st.columns(3)
 with c4:
     st.metric("Barrera Transporte (P1)", f"{tot_transporte - rescatados_transporte:,} pac.", f"-{rescatados_transporte} rescatados (Base: {tot_transporte})", delta_color="inverse")
 with c5:
-    st.metric("Deficit Ayuda Tecnica (P2)", f"{tot_tecnica - rescatados_ortopedia:,} pac.", f"-{rescatados_ortopedia} rescatados (Base: {tot_tecnica})", delta_color="inverse")
+    st.metric("Déficit Ayuda Técnica (P2)", f"{tot_tecnica - rescatados_ortopedia:,} pac.", f"-{rescatados_ortopedia} rescatados (Base: {tot_tecnica})", delta_color="inverse")
 with c6:
-    st.metric("Deficit Apoyo y Entorno (P3)", f"{tot_apoyo - rescatados_apoyo:,} pac.", f"-{rescatados_apoyo} rescatados (Base: {tot_apoyo})", delta_color="inverse")
+    st.metric("Déficit Apoyo y Entorno (P3)", f"{tot_apoyo - rescatados_apoyo:,} pac.", f"-{rescatados_apoyo} rescatados (Base: {tot_apoyo})", delta_color="inverse")
 
-st.markdown("---")
+st.markdown("<br>", unsafe_allow_html=True)
 
 # PESTANAS DE NAVEGACION
 tab1, tab2, tab3 = st.tabs([
-    "Mapa GPS (Clusters IA) y Focos Rojos",
-    "Licitacion Exacta de Ortopedia y Ayudas Tecnicas",
-    "Explorador de Pacientes y Prediccion Random Forest"
+    "📍 Mapa (Clústers IA)",
+    "🛒 Adquisiciones Exactas",
+    "📋 Explorador Random Forest"
 ])
 
 with tab1:
-    col_mapa, col_rank = st.columns([1.35, 1])
+    col_mapa, col_rank = st.columns([1.2, 1])
     
     with col_mapa:
-        st.markdown("#### Georreferenciacion de Pacientes por Cluster K-Means")
+        st.markdown("#### Distribución Espacial K-Means")
 
         legend_html = (
             "<div class='legend-box'>"
-            "<span style='color:#D90429; font-weight:bold;'>Cluster 0 (Rojo):</span> Alta Severidad Clinica (Ortopedia/Cuidador) | "
-            "<span style='color:#F77F00; font-weight:bold;'>Cluster 2 (Naranja):</span> Rural Entorno Critico (U. Moviles) | "
-            "<span style='color:#2B9348; font-weight:bold;'>Cluster 1 (Verde):</span> Urbano Moderado (Inclusion/Becas)"
+            "<strong>Leyenda de Severidad:</strong><br>"
+            "<span style='color:#DC2626;'>●</span> Cluster 0 (Alta: Ortopedia/Cuidador) &nbsp;|&nbsp; "
+            "<span style='color:#F59E0B;'>●</span> Cluster 2 (Media: Rural/Móviles) &nbsp;|&nbsp; "
+            "<span style='color:#10B981;'>●</span> Cluster 1 (Baja: Urbano/Becas)"
             "</div>"
         )
         st.markdown(legend_html, unsafe_allow_html=True)
         
         colores_clusters = {
-            "Cluster 0: Alta Severidad Clinica (Ortopedia/Cuidador)": "#D90429",
-            "Cluster 2: Rural Entorno Critico (Unidades Moviles)": "#F77F00",
-            "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#2B9348"
+            "Cluster 0: Alta Severidad Clinica (Ortopedia/Cuidador)": "#DC2626", # Rojos más estéticos
+            "Cluster 2: Rural Entorno Critico (Unidades Moviles)": "#F59E0B",
+            "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#10B981"
         }
         
         # AQUI CREAMOS EL FILTRO EXCLUSIVO PARA EL MAPA
@@ -213,7 +306,7 @@ with tab1:
         m = folium.Map(
             location=[lat_centro, lon_centro],
             zoom_start=zoom_nivel,
-            tiles="OpenStreetMap",
+            tiles="CartoDB positron", # Mapa más limpio y moderno (gris claro)
             control_scale=True
         )
         
@@ -225,24 +318,25 @@ with tab1:
                 "<b>Municipio:</b> " + str(row["MUNICIPIO"]) + "<br>"
                 "<b>Localidad:</b> " + str(row["LOCALIDAD"]) + "<br>"
                 "<b>Cluster:</b> " + perfil + "<br>"
-                "<b>Diagnostico:</b> " + str(row["DIAGNOSTICO"]) + "<br>"
+                "<b>Diagnóstico:</b> " + str(row["DIAGNOSTICO"]) + "<br>"
                 "<b>Discapacidad:</b> " + str(row["PCT_DISCAPACIDAD"]) + "%<br>"
-                "<b>Prob. Deficit IA:</b> " + f"{row['PROBABILIDAD_DEFICIT_IA']:.1f}%"
+                "<b>Prob. Déficit IA:</b> " + f"{row['PROBABILIDAD_DEFICIT_IA']:.1f}%"
             )
             folium.CircleMarker(
                 location=[float(row["LAT_DECIMAL"]), float(row["LON_DECIMAL"])],
-                radius=5,
+                radius=4.5, # Puntos ligeramente más pequeños y elegantes
                 color=color_punto,
+                weight=1,
                 fill=True,
                 fill_color=color_punto,
-                fill_opacity=0.85,
+                fill_opacity=0.75,
                 tooltip=folium.Tooltip(tooltip_txt)
             ).add_to(m)
             
-        st_folium(m, use_container_width=True, height=480, returned_objects=[])
+        st_folium(m, use_container_width=True, height=500, returned_objects=[])
         
     with col_rank:
-        st.markdown("#### Top 10 Municipios en Foco Rojo (Indice M.A.P.A.)")
+        st.markdown("#### Top 10 Focos Rojos Municipales")
         df_rank = df_mun.copy()
         if min_evaluados:
             df_rank = df_rank[df_rank["TOTAL_EVALUADOS"] >= 10]
@@ -259,27 +353,38 @@ with tab1:
         fig_bar.add_trace(go.Bar(
             y=top10["MUNICIPIO"],
             x=top10["INDICE_URGENCIA_MAPA"],
-            name="Indice Base (Sin Intervencion)",
+            name="Índice Base",
             orientation="h",
-            marker_color=GRIS_BASE
+            marker_color=GRIS_BASE,
+            marker_line_width=0 # Sin bordes en las barras
         ))
         fig_bar.add_trace(go.Bar(
             y=top10["MUNICIPIO"],
             x=top10["INDICE_SIMULADO"],
-            name="Indice Post-Inversion (Simulado)",
+            name="Índice Simulado",
             orientation="h",
-            marker_color=AZUL_INST
+            marker_color=AZUL_INST,
+            marker_line_width=0
         ))
+        
         fig_bar.update_layout(
-            barmode="overlay",
-            height=520,
-            xaxis_title="Indice de Urgencia M.A.P.A. (0 a 100)",
+            barmode="overlay", # Se superponen suavemente
+            height=500,
+            xaxis_title="Índice de Urgencia (0 a 100)",
             yaxis_title=None,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-            margin={"r": 10, "t": 30, "l": 10, "b": 10}
+            plot_bgcolor='rgba(0,0,0,0)', # Fondo transparente
+            paper_bgcolor='rgba(0,0,0,0)',
+            legend=dict(
+                orientation="h", 
+                yanchor="bottom", y=1.02, xanchor="left", x=0,
+                font=dict(size=12, color="#4B5563")
+            ),
+            margin={"r": 10, "t": 30, "l": 10, "b": 10},
+            bargap=0.3 # Hace las barras más delgadas y elegantes
         )
-        fig_bar.update_xaxes(fixedrange=True)
-        fig_bar.update_yaxes(fixedrange=True)
+        # Cuadrícula muy sutil en el eje X
+        fig_bar.update_xaxes(fixedrange=True, showgrid=True, gridwidth=1, gridcolor='#E5E7EB')
+        fig_bar.update_yaxes(fixedrange=True, showgrid=False)
 
         st.plotly_chart(
             fig_bar,
@@ -287,12 +392,13 @@ with tab1:
             config={
                 "displaylogo": False,
                 "modeBarButtons": [["toImage"]],
-                "toImageButtonOptions": {"format": "png", "filename": "ranking_mapa", "scale": 2},
             },
         )
 
 with tab2:
-    st.markdown("#### Cuadro de Adquisiciones Quirurgicas para Gobierno")
+    st.markdown("#### Cuadro de Adquisiciones Gubernamentales")
+    st.caption("Cálculo exacto basado en pacientes nominales y porcentaje de inversión.")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     sillas_tot = int(df_p_f["FALTA_SILLA_RUEDAS"].sum())
     bastones_tot = int(df_p_f["FALTA_BASTON"].sum())
@@ -303,13 +409,13 @@ with tab2:
     factor_orto = slider_ortopedia / 100.0
     
     k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("Sillas de Ruedas", f"{sillas_tot} req.", f"{int(round(sillas_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k2.metric("Bastones", f"{bastones_tot} req.", f"{int(round(bastones_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k3.metric("Andadores", f"{andadores_tot} req.", f"{int(round(andadores_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k4.metric("Protesis / Ortesis", f"{protesis_tot} req.", f"{int(round(protesis_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
-    k5.metric("Audifonos", f"{audifonos_tot} req.", f"{int(round(audifonos_tot * factor_orto))} a comprar ({slider_ortopedia}%)")
+    k1.metric("Sillas de Ruedas", f"{sillas_tot} req.", f"+{int(round(sillas_tot * factor_orto))} a comprar")
+    k2.metric("Bastones", f"{bastones_tot} req.", f"+{int(round(bastones_tot * factor_orto))} a comprar")
+    k3.metric("Andadores", f"{andadores_tot} req.", f"+{int(round(andadores_tot * factor_orto))} a comprar")
+    k4.metric("Prótesis / Órtesis", f"{protesis_tot} req.", f"+{int(round(protesis_tot * factor_orto))} a comprar")
+    k5.metric("Audífonos", f"{audifonos_tot} req.", f"+{int(round(audifonos_tot * factor_orto))} a comprar")
     
-    st.markdown("##### Desglose Exacto de Compras por Municipio")
+    st.markdown("<br>##### Desglose por Municipio", unsafe_allow_html=True)
     cols_compras = [
         "MUNICIPIO", "TOTAL_EVALUADOS", "INDICE_URGENCIA_MAPA", "TASA_EXCLUSION_PCT",
         "TOTAL_SIN_AYUDA_TECNICA", "SILLAS_FALTANTES", "BASTONES_FALTANTES",
@@ -319,8 +425,8 @@ with tab2:
     st.dataframe(tabla_compras, use_container_width=True, hide_index=True)
 
 with tab3:
-    st.markdown("#### Padron Nominal Priorizado por Random Forest")
-    st.caption("Ordenado desde el paciente con mayor probabilidad de rezago critico para despliegue inmediato de brigadas:")
+    st.markdown("#### Padrón Nominal Priorizado por Random Forest")
+    st.caption("Ordenado desde el paciente con mayor probabilidad de rezago crítico.")
     
     cols_pac = [
         "ID_REGISTRO", "MUNICIPIO", "LOCALIDAD", "AMBITO", "EDAD", "SEXO",
@@ -335,6 +441,6 @@ with tab3:
 
 # PIE DE PAGINA
 st.markdown(
-    "<div class='footer-box'><b>Gobierno del Estado de Guanajuato</b> | Secretaria de Derechos Humanos | M.A.P.A. 2024-2030</div>",
+    "<div class='footer-box'><b>Gobierno del Estado de Guanajuato</b> | Secretaría de Derechos Humanos | M.A.P.A. 2024-2030</div>",
     unsafe_allow_html=True
 )
