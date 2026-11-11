@@ -13,17 +13,14 @@ AZUL_OSCURO = "#00408F"
 AZUL_CLARO = "#E6F2FF"
 GRIS_BASE = "#B0BEC5"
 
-# Rutas de imagenes que estan dentro de la raiz
 BASE_DIR = Path(__file__).parent
-ASSETS = BASE_DIR  
+ASSETS = BASE_DIR
 LOGO_PRINCIPAL = ASSETS / "logo_derechos_humanos.png"
 
-# Esto es en caso de que no exista una imagen, no se rompa el programa
 def mostrar_imagen(ruta, **kwargs):
     if Path(ruta).exists():
         st.image(str(ruta), **kwargs)
 
-#Convierte la imagen en html para que no se pueda ampliar la imagen
 def logo_fijo(ruta):
     ruta = Path(ruta)
     if not ruta.exists():
@@ -34,8 +31,6 @@ def logo_fijo(ruta):
         "style='width:100%; pointer-events:none; user-select:none;' draggable='false'>"
     )
 
-
-# CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
 st.set_page_config(
     page_title="M.A.P.A. Guanajuato | Simulador IA",
     page_icon=str(LOGO_PRINCIPAL) if LOGO_PRINCIPAL.exists() else None,
@@ -46,43 +41,51 @@ st.set_page_config(
 css_style = (
     "<style>"
     ".header-box { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 55%, " + AZUL_INST + " 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,102,255,0.30); width: 100%; text-align: center; }"
-    "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); }"
+    "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); background-color: #ffffff; }"
     ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
-    "h2, h3, h4 { color: " + AZUL_INST_ALT + "; }"
+    "h2, h3, h4 { color: " + AZUL_INST_ALT + "; font-weight: 600; }"
     ".footer-box { text-align: center; padding: 14px; margin-top: 24px; border-top: 3px solid " + AZUL_INST + "; font-size: 13px; opacity: 0.85; }"
+    
+    "[data-testid='stSidebar'] { background-color: #F8FAFC; border-right: 1px solid #E2E8F0; }"
+    "[data-testid='stSidebar'] h2 { color: #0F172A; font-size: 1.6rem; }"
+    "[data-testid='stSidebar'] h4 { color: #334155; font-size: 1.05rem; margin-bottom: 0px; padding-bottom: 0px; }"
+    "[data-testid='stSidebar'] label { color: #475569; font-weight: 600; font-size: 0.9rem; }"
+    "div[data-baseweb='select'] > div, div[data-baseweb='input'] > div { background-color: #ffffff; border-radius: 8px; border: 1px solid #CBD5E1; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }"
+    "[data-testid='stCheckbox'] label span { color: #475569; font-size: 0.9rem; }"
     "</style>"
 )
 st.markdown(css_style, unsafe_allow_html=True)
 
-# CARGA DE DATOS
 @st.cache_data
 def cargar_datos():
     df_pac = pd.read_csv("MAPA_PACIENTES_ENRIQUECIDO.csv")
     df_mun = pd.read_csv("MAPA_MUNICIPIOS_RANKING.csv")
     
-    # Asegurar que sean números
     df_pac["LAT_DECIMAL"] = pd.to_numeric(df_pac["LAT_DECIMAL"], errors="coerce")
     df_pac["LON_DECIMAL"] = pd.to_numeric(df_pac["LON_DECIMAL"], errors="coerce")
 
     return df_pac, df_mun
 
 try:
-    # Recibimos los dataframes
     df_pac, df_mun = cargar_datos()
 except Exception as e:
     st.error("No se encontraron los archivos CSV en el repositorio.")
     st.stop()
 
-# BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
 with st.sidebar:
     st.markdown("## Panel de Control M.A.P.A.")
     st.caption("Modelo Analitico de Prediccion y Asignacion - Guanajuato")
+    
+    st.markdown("<hr style='margin: 15px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
+    st.markdown("#### Filtros Territoriales")
     
     lista_municipios = ["Todo Guanajuato"] + sorted(df_mun["MUNICIPIO"].unique().tolist())
     mun_seleccionado = st.selectbox("Filtrar Territorio:", lista_municipios)
     
     min_evaluados = st.checkbox("Filtrar Ranking con >= 10 evaluados (Focos Rojos Oficiales)", value=True)
     
+    st.markdown("<hr style='margin: 20px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
+    st.markdown("#### Simulador de Presupuesto")
     st.caption("Seleccione el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
     
     slider_transporte = st.number_input(
@@ -98,7 +101,6 @@ with st.sidebar:
         min_value=0, max_value=100, value=0, step=1
     )
 
-# MOTOR MATEMATICO DEL SIMULADOR WHAT-IF
 if mun_seleccionado == "Todo Guanajuato":
     df_p_f = df_pac.copy()
     df_m_f = df_mun.copy()
@@ -133,18 +135,14 @@ factor_mitigacion_ia = (0.40 * (slider_transporte / 100.0)) + (0.35 * (slider_or
 tasa_exc_sim = tasa_exc_base * (1.0 - factor_mitigacion_ia)
 excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 
-# ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
-col_logo, col_header = st.columns([1, 4], vertical_alignment="center")
-
-with col_header:
-    header_html = (
-        "<div class='header-box'>"
-        "<h1 style='margin:0; font-size: 28px; color: white;'>Sistema M.A.P.A. - Estado de Guanajuato</h1>"
-        "<p style='margin:5px 0 0 0; font-size: 16px; opacity: 0.95;'>"
-        "Modelo Analitico de Prediccion y Asignacion de Recursos para Personas con Discapacidad | <b>Territorio: " + str(mun_seleccionado) + "</b>"
-        "</p></div>"
-    )
-    st.markdown(header_html, unsafe_allow_html=True)
+header_html = (
+    "<div class='header-box'>"
+    "<h1 style='margin: 0; font-size: 28px; color: white;'>Sistema M.A.P.A. - Estado de Guanajuato</h1>"
+    "<p style='margin: 5px 0 0 0; font-size: 16px; opacity: 0.95;'>"
+    "Modelo Analitico de Prediccion y Asignacion de Recursos para Personas con Discapacidad | <b>Territorio: " + str(mun_seleccionado) + "</b>"
+    "</p></div>"
+)
+st.markdown(header_html, unsafe_allow_html=True)
 
 st.subheader("Impacto Presupuestal Simulado: Antes vs. Despues de la Inversion")
 
@@ -168,7 +166,6 @@ with c6:
 
 st.markdown("---")
 
-# PESTANAS DE NAVEGACION
 tab1, tab2, tab3 = st.tabs([
     "Mapa GPS (Clusters IA) y Focos Rojos",
     "Licitacion Exacta de Ortopedia y Ayudas Tecnicas",
@@ -196,7 +193,6 @@ with tab1:
             "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#2B9348"
         }
         
-        # AQUI CREAMOS EL FILTRO EXCLUSIVO PARA EL MAPA
         df_mapa_local = df_p_f.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
         
         if len(df_mapa_local) > 0:
@@ -214,7 +210,6 @@ with tab1:
             control_scale=True
         )
         
-        # ITERAMOS SOBRE df_mapa_local EN VEZ DE df_p_f
         for _, row in df_mapa_local.iterrows():
             perfil = str(row["PERFIL_CLUSTER"])
             color_punto = colores_clusters.get(perfil, AZUL_INST_ALT)
@@ -330,7 +325,6 @@ with tab3:
         hide_index=True
     )
 
-# PIE DE PAGINA
 st.markdown(
     "<div class='footer-box'><b>Gobierno del Estado de Guanajuato</b> | Secretaria de Derechos Humanos | M.A.P.A. 2024-2030</div>",
     unsafe_allow_html=True
