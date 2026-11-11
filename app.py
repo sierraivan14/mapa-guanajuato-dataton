@@ -40,14 +40,14 @@ st.set_page_config(
 
 css_style = (
     "<style>"
-    ".stApp { background-color: #F0F4F8; }"
+    ".stApp, [data-testid='stAppViewContainer'] { background-color: #F0F4F8; }"
     "[data-testid='stHeader'] { background-color: transparent; }"
     ".stTabs [data-baseweb='tab-list'] { background-color: transparent; }"
     ".stTabs [data-baseweb='tab'] { background-color: transparent; }"
     ".stTabs [aria-selected='true'] { background-color: transparent; border-bottom: 2px solid " + AZUL_INST + "; }"
     "div[data-testid='stBlock'] { background-color: transparent; }"
-    ".header-box { background-color: #0055D4; color: white; padding: 22px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0px 8px 0px #003380, 0px 12px 20px rgba(0,0,0,0.25); width: 100%; text-align: center; border: 1px solid #0044AA; max-width: 100%; }"
-    ".sidebar-header { background-color: #0F172A; padding: 18px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0px 6px 0px #020617, 0px 10px 15px rgba(0,0,0,0.3); border: 1px solid #1E293B; }"
+    ".header-box { background-color: #0066FF; color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0px 6px 0px #0047B3; text-align: center; border: 1px solid #0047B3; box-sizing: border-box; }"
+    ".sidebar-header { background-color: #1E293B; padding: 18px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0px 5px 0px #0F172A; border: 1px solid #0F172A; box-sizing: border-box; }"
     ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
     ".sidebar-header p { color: #CBD5E1 !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
     "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); background-color: #ffffff; }"
@@ -98,7 +98,6 @@ with st.sidebar:
     
     st.markdown("<hr style='margin: 20px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
     st.markdown("#### Simulador de Presupuesto")
-    st.caption("Seleccione el porcentaje de cobertura presupuestal para simular el impacto en tiempo real:")
     
     slider_transporte = st.number_input(
         "Palanca 1: Transporte Adaptado y U. Moviles (%)",
@@ -329,7 +328,6 @@ with tab2:
 
 with tab3:
     st.markdown("#### Padron Nominal Priorizado por Random Forest")
-    st.caption("Ordenado desde el paciente con mayor probabilidad de rezago critico para despliegue inmediato de brigadas:")
     
     cols_pac = [
         "ID_REGISTRO", "MUNICIPIO", "LOCALIDAD", "AMBITO", "EDAD", "SEXO",
