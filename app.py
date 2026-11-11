@@ -136,9 +136,6 @@ excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 # ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
 col_logo, col_header = st.columns([1, 4], vertical_alignment="center")
 
-with col_logo:
-    st.markdown(logo_fijo(LOGO_PRINCIPAL), unsafe_allow_html=True)
-
 with col_header:
     header_html = (
         "<div class='header-box'>"
