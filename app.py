@@ -41,24 +41,19 @@ st.set_page_config(
 css_style = (
     "<style>"
     ".stApp { background-color: #F0F4F8; }"
-    
     "[data-testid='stHeader'] { background-color: transparent; }"
     ".stTabs [data-baseweb='tab-list'] { background-color: transparent; }"
     ".stTabs [data-baseweb='tab'] { background-color: transparent; }"
     ".stTabs [aria-selected='true'] { background-color: transparent; border-bottom: 2px solid " + AZUL_INST + "; }"
     "div[data-testid='stBlock'] { background-color: transparent; }"
-    
-    ".header-box { background-color: #0055D4; color: white; padding: 22px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0px 8px 0px #003380, 0px 12px 20px rgba(0,0,0,0.25); width: 100%; text-align: center; border: 1px solid #0044AA; }"
-    
+    ".header-box { background-color: #0055D4; color: white; padding: 22px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0px 8px 0px #003380, 0px 12px 20px rgba(0,0,0,0.25); width: 100%; text-align: center; border: 1px solid #0044AA; max-width: 100%; }"
     ".sidebar-header { background-color: #0F172A; padding: 18px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0px 6px 0px #020617, 0px 10px 15px rgba(0,0,0,0.3); border: 1px solid #1E293B; }"
     ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
     ".sidebar-header p { color: #CBD5E1 !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
-
     "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); background-color: #ffffff; }"
     ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
     "h2, h3, h4 { color: " + AZUL_INST_ALT + "; font-weight: 600; }"
     ".footer-box { text-align: center; padding: 14px; margin-top: 24px; border-top: 3px solid " + AZUL_INST + "; font-size: 13px; opacity: 0.85; }"
-    
     "[data-testid='stSidebar'] { background-color: #F8FAFC; border-right: 1px solid #E2E8F0; }"
     "[data-testid='stSidebar'] h4 { color: #334155; font-size: 1.05rem; margin-bottom: 0px; padding-bottom: 0px; }"
     "[data-testid='stSidebar'] label { color: #475569; font-weight: 600; font-size: 0.9rem; }"
@@ -152,14 +147,14 @@ factor_mitigacion_ia = (0.40 * (slider_transporte / 100.0)) + (0.35 * (slider_or
 tasa_exc_sim = tasa_exc_base * (1.0 - factor_mitigacion_ia)
 excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 
-header_html = (
+st.markdown(
     "<div class='header-box'>"
     "<h1 style='margin: 0; font-size: 28px; color: white;'>Sistema M.A.P.A. - Estado de Guanajuato</h1>"
     "<p style='margin: 5px 0 0 0; font-size: 16px; opacity: 0.95;'>"
     "Modelo Analitico de Prediccion y Asignacion de Recursos para Personas con Discapacidad | <b>Territorio: " + str(mun_seleccionado) + "</b>"
-    "</p></div>"
+    "</p></div>",
+    unsafe_allow_html=True
 )
-st.markdown(header_html, unsafe_allow_html=True)
 
 st.subheader("Impacto Presupuestal Simulado: Antes vs. Despues de la Inversion")
 
