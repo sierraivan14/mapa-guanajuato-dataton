@@ -40,14 +40,6 @@ st.set_page_config(
 
 css_style = (
     "<style>"
-    ".stApp { background-color: #F0F4F8; }"
-
-    "[data-testid='stHeader'] { background-color: transparent; }"
-    ".stTabs [data-baseweb='tab-list'] { background-color: transparent; }"
-    ".stTabs [data-baseweb='tab'] { background-color: transparent; }"
-    ".stTabs [aria-selected='true'] { background-color: transparent; border-bottom: 2px solid " + AZUL_INST + "; }"
-    "div[data-testid='stBlock'] { background-color: transparent; }"
-    
     ".header-box { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 55%, " + AZUL_INST + " 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,102,255,0.30); width: 100%; text-align: center; }"
     "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); background-color: #ffffff; }"
     ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
@@ -61,7 +53,7 @@ css_style = (
     "div[data-baseweb='select'] > div, div[data-baseweb='input'] > div { background-color: #ffffff; border-radius: 8px; border: 1px solid #CBD5E1; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }"
     "[data-testid='stCheckbox'] label span { color: #475569; font-size: 0.9rem; }"
     
-    ".sidebar-header { background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%); padding: 18px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }"
+    ".sidebar-header { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 100%); padding: 18px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }"
     ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
     ".sidebar-header p { color: #E6F2FF !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
     "</style>"
