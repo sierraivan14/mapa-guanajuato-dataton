@@ -52,6 +52,10 @@ css_style = (
     "[data-testid='stSidebar'] label { color: #475569; font-weight: 600; font-size: 0.9rem; }"
     "div[data-baseweb='select'] > div, div[data-baseweb='input'] > div { background-color: #ffffff; border-radius: 8px; border: 1px solid #CBD5E1; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }"
     "[data-testid='stCheckbox'] label span { color: #475569; font-size: 0.9rem; }"
+    
+    ".sidebar-header { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 100%); padding: 18px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }"
+    ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
+    ".sidebar-header p { color: #E6F2FF !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
     "</style>"
 )
 st.markdown(css_style, unsafe_allow_html=True)
@@ -73,8 +77,13 @@ except Exception as e:
     st.stop()
 
 with st.sidebar:
-    st.markdown("## Panel de Control M.A.P.A.")
-    st.caption("Modelo Analitico de Prediccion y Asignacion - Guanajuato")
+    st.markdown(
+        "<div class='sidebar-header'>"
+        "<h2>Panel de Control M.A.P.A.</h2>"
+        "<p>Modelo Analitico de Prediccion y Asignacion - Guanajuato</p>"
+        "</div>",
+        unsafe_allow_html=True
+    )
     
     st.markdown("<hr style='margin: 15px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
     st.markdown("#### Filtros Territoriales")
