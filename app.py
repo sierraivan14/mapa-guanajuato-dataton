@@ -40,24 +40,20 @@ st.set_page_config(
 
 css_style = (
     "<style>"
-    /* FONDO GENERAL GRIS AZULADO */
     ".stApp { background-color: #F0F4F8; }"
     
-    /* CORRECCION: Forzar fondo transparente/gris en los contenedores de Streamlit que se quedan blancos */
     "[data-testid='stHeader'] { background-color: transparent; }"
     ".stTabs [data-baseweb='tab-list'] { background-color: transparent; }"
     ".stTabs [data-baseweb='tab'] { background-color: transparent; }"
     ".stTabs [aria-selected='true'] { background-color: transparent; border-bottom: 2px solid " + AZUL_INST + "; }"
     "div[data-testid='stBlock'] { background-color: transparent; }"
     
-    /* ENCABEZADOS 3D SIN DEGRADADOS */
     ".header-box { background-color: #0055D4; color: white; padding: 22px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0px 8px 0px #003380, 0px 12px 20px rgba(0,0,0,0.25); width: 100%; text-align: center; border: 1px solid #0044AA; }"
     
     ".sidebar-header { background-color: #0F172A; padding: 18px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0px 6px 0px #020617, 0px 10px 15px rgba(0,0,0,0.3); border: 1px solid #1E293B; }"
     ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
     ".sidebar-header p { color: #CBD5E1 !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
 
-    /* TARJETAS Y CONTROLES */
     "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); background-color: #ffffff; }"
     ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
     "h2, h3, h4 { color: " + AZUL_INST_ALT + "; font-weight: 600; }"
