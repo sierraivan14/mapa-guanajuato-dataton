@@ -7,25 +7,21 @@ from streamlit_folium import st_folium
 from pathlib import Path
 import base64
 
-# Colores actualizados para un aspecto más moderno y menos saturado
-AZUL_INST = "#1A73E8"      # Azul estilo Material/Google
+AZUL_INST = "#1A73E8"
 AZUL_INST_ALT = "#1967D2"
 AZUL_OSCURO = "#0D47A1"
 AZUL_CLARO = "#E8F0FE"
-GRIS_BASE = "#D1D5DB"      # Gris más suave para gráficas
-GRIS_FONDO = "#F3F4F6"     # Fondo principal de la app
+GRIS_BASE = "#D1D5DB"
+GRIS_FONDO = "#F3F4F6"
 
-# Rutas de imagenes que estan dentro de la raiz
 BASE_DIR = Path(__file__).parent
-ASSETS = BASE_DIR  
+ASSETS = BASE_DIR
 LOGO_PRINCIPAL = ASSETS / "logo_derechos_humanos.png"
 
-# Esto es en caso de que no exista una imagen, no se rompa el programa
 def mostrar_imagen(ruta, **kwargs):
     if Path(ruta).exists():
         st.image(str(ruta), **kwargs)
 
-#Convierte la imagen en html para que no se pueda ampliar la imagen
 def logo_fijo(ruta):
     ruta = Path(ruta)
     if not ruta.exists():
@@ -36,7 +32,6 @@ def logo_fijo(ruta):
         "style='width:100%; max-width: 180px; pointer-events:none; user-select:none;' draggable='false'>"
     )
 
-# CONFIGURACION DE LA PAGINA Y ESTILO EJECUTIVO
 st.set_page_config(
     page_title="M.A.P.A. Guanajuato | Simulador IA",
     page_icon=str(LOGO_PRINCIPAL) if LOGO_PRINCIPAL.exists() else None,
@@ -44,20 +39,12 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
-# BLOQUE CSS MODIFICADO (UI/UX)
 css_style = (
     "<style>"
-    /* Importar fuente moderna (opcional, pero mejora el aspecto) */
     "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');"
-    
-    /* Aplicar tipografía y fondo general */
     "html, body, [class*='css'] { font-family: 'Inter', sans-serif; }"
     ".stApp { background-color: " + GRIS_FONDO + "; }"
-    
-    /* Fondo del sidebar para diferenciarlo del contenido principal */
     "[data-testid='stSidebar'] { background-color: #ffffff; border-right: 1px solid #E5E7EB; }"
-    
-    /* Diseño del Banner de Encabezado */
     ".header-box { "
     "   background: linear-gradient(135deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST + " 100%); "
     "   color: white; "
@@ -67,8 +54,6 @@ css_style = (
     "   box-shadow: 0 10px 15px -3px rgba(26, 115, 232, 0.2), 0 4px 6px -2px rgba(26, 115, 232, 0.1); "
     "}"
     ".header-box h1 { font-weight: 700; letter-spacing: -0.5px; }"
-    
-    /* Diseño moderno de las Tarjetas de Métricas (KPIs) */
     "div[data-testid='metric-container'] { "
     "   background-color: #ffffff; "
     "   padding: 16px 20px; "
@@ -82,13 +67,9 @@ css_style = (
     "   transform: translateY(-2px); "
     "   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); "
     "}"
-    
-    /* Títulos dentro de las tarjetas (más sutiles) */
     "div[data-testid='metric-container'] label { "
     "   color: #6B7280; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.02em; "
     "}"
-    
-    /* Caja de Leyenda del Mapa */
     ".legend-box { "
     "   padding: 12px 16px; "
     "   border-radius: 8px; "
@@ -99,12 +80,8 @@ css_style = (
     "   font-size: 13px; "
     "   color: #374151; "
     "}"
-    
-    /* Estilos de encabezados secundarios */
     "h2, h3, h4 { color: #111827; font-weight: 600; }"
     "h3 { margin-bottom: 1rem; }"
-    
-    /* Modificar los Tabs de navegación */
     ".stTabs [data-baseweb='tab-list'] { gap: 8px; }"
     ".stTabs [data-baseweb='tab'] { "
     "   background-color: #ffffff; "
@@ -118,8 +95,6 @@ css_style = (
     "   border-bottom-color: #ffffff; "
     "   color: " + AZUL_INST + "; font-weight: 600; "
     "}"
-    
-    /* Contenedores de Dataframes/Gráficos con fondo blanco */
     "[data-testid='stDataFrame'], [data-testid='stPlotlyChart'] { "
     "   background-color: #ffffff; "
     "   padding: 10px; "
@@ -127,8 +102,6 @@ css_style = (
     "   box-shadow: 0 1px 3px rgba(0,0,0,0.05); "
     "   border: 1px solid #E5E7EB; "
     "}"
-    
-    /* Pie de página */
     ".footer-box { "
     "   text-align: center; "
     "   padding: 20px; "
@@ -141,30 +114,26 @@ css_style = (
 )
 st.markdown(css_style, unsafe_allow_html=True)
 
-# CARGA DE DATOS
 @st.cache_data
 def cargar_datos():
     df_pac = pd.read_csv("MAPA_PACIENTES_ENRIQUECIDO.csv")
     df_mun = pd.read_csv("MAPA_MUNICIPIOS_RANKING.csv")
     
-    # Asegurar que sean números
     df_pac["LAT_DECIMAL"] = pd.to_numeric(df_pac["LAT_DECIMAL"], errors="coerce")
     df_pac["LON_DECIMAL"] = pd.to_numeric(df_pac["LON_DECIMAL"], errors="coerce")
 
     return df_pac, df_mun
 
 try:
-    # Recibimos los dataframes
     df_pac, df_mun = cargar_datos()
 except Exception as e:
     st.error("No se encontraron los archivos CSV en el repositorio.")
     st.stop()
 
-# BARRA LATERAL: FILTROS Y SIMULADOR WHAT-IF
 with st.sidebar:
     st.markdown("## Panel de Control")
     st.caption("M.A.P.A. Guanajuato")
-    st.divider() # Línea divisoria sutil
+    st.divider()
     
     lista_municipios = ["Todo Guanajuato"] + sorted(df_mun["MUNICIPIO"].unique().tolist())
     mun_seleccionado = st.selectbox("Filtrar Territorio:", lista_municipios)
@@ -188,7 +157,6 @@ with st.sidebar:
         min_value=0, max_value=100, value=0, step=1
     )
 
-# MOTOR MATEMATICO DEL SIMULADOR WHAT-IF
 if mun_seleccionado == "Todo Guanajuato":
     df_p_f = df_pac.copy()
     df_m_f = df_mun.copy()
@@ -223,7 +191,6 @@ factor_mitigacion_ia = (0.40 * (slider_transporte / 100.0)) + (0.35 * (slider_or
 tasa_exc_sim = tasa_exc_base * (1.0 - factor_mitigacion_ia)
 excluidos_rescatados = int(round(tot_excluidos * factor_mitigacion_ia))
 
-# ENCABEZADO (LOGO + BANNER) Y TARJETAS KPI
 col_logo, col_header = st.columns([1, 5], vertical_alignment="center")
 
 with col_logo:
@@ -251,7 +218,7 @@ with c3:
     delta_exc = tasa_exc_sim - tasa_exc_base
     st.metric("Tasa de Exclusión", f"{tasa_exc_sim:.1f}%", f"{delta_exc:.1f}% ({excluidos_rescatados} reinsertados)", delta_color="inverse")
 
-st.markdown("<br>", unsafe_allow_html=True) # Espacio sutil entre filas de KPIs
+st.markdown("<br>", unsafe_allow_html=True)
 
 c4, c5, c6 = st.columns(3)
 with c4:
@@ -263,7 +230,6 @@ with c6:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# PESTANAS DE NAVEGACION
 tab1, tab2, tab3 = st.tabs([
     "📍 Mapa (Clústers IA)",
     "🛒 Adquisiciones Exactas",
@@ -287,12 +253,11 @@ with tab1:
         st.markdown(legend_html, unsafe_allow_html=True)
         
         colores_clusters = {
-            "Cluster 0: Alta Severidad Clinica (Ortopedia/Cuidador)": "#DC2626", # Rojos más estéticos
+            "Cluster 0: Alta Severidad Clinica (Ortopedia/Cuidador)": "#DC2626",
             "Cluster 2: Rural Entorno Critico (Unidades Moviles)": "#F59E0B",
             "Cluster 1: Urbano Moderado (Inclusion Laboral/Becas)": "#10B981"
         }
         
-        # AQUI CREAMOS EL FILTRO EXCLUSIVO PARA EL MAPA
         df_mapa_local = df_p_f.dropna(subset=["LAT_DECIMAL", "LON_DECIMAL"])
         
         if len(df_mapa_local) > 0:
@@ -306,11 +271,10 @@ with tab1:
         m = folium.Map(
             location=[lat_centro, lon_centro],
             zoom_start=zoom_nivel,
-            tiles="CartoDB positron", # Mapa más limpio y moderno (gris claro)
+            tiles="CartoDB positron",
             control_scale=True
         )
         
-        # ITERAMOS SOBRE df_mapa_local EN VEZ DE df_p_f
         for _, row in df_mapa_local.iterrows():
             perfil = str(row["PERFIL_CLUSTER"])
             color_punto = colores_clusters.get(perfil, AZUL_INST_ALT)
@@ -324,7 +288,7 @@ with tab1:
             )
             folium.CircleMarker(
                 location=[float(row["LAT_DECIMAL"]), float(row["LON_DECIMAL"])],
-                radius=4.5, # Puntos ligeramente más pequeños y elegantes
+                radius=4.5,
                 color=color_punto,
                 weight=1,
                 fill=True,
@@ -356,7 +320,7 @@ with tab1:
             name="Índice Base",
             orientation="h",
             marker_color=GRIS_BASE,
-            marker_line_width=0 # Sin bordes en las barras
+            marker_line_width=0
         ))
         fig_bar.add_trace(go.Bar(
             y=top10["MUNICIPIO"],
@@ -368,11 +332,11 @@ with tab1:
         ))
         
         fig_bar.update_layout(
-            barmode="overlay", # Se superponen suavemente
+            barmode="overlay",
             height=500,
             xaxis_title="Índice de Urgencia (0 a 100)",
             yaxis_title=None,
-            plot_bgcolor='rgba(0,0,0,0)', # Fondo transparente
+            plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
             legend=dict(
                 orientation="h", 
@@ -380,9 +344,8 @@ with tab1:
                 font=dict(size=12, color="#4B5563")
             ),
             margin={"r": 10, "t": 30, "l": 10, "b": 10},
-            bargap=0.3 # Hace las barras más delgadas y elegantes
+            bargap=0.3
         )
-        # Cuadrícula muy sutil en el eje X
         fig_bar.update_xaxes(fixedrange=True, showgrid=True, gridwidth=1, gridcolor='#E5E7EB')
         fig_bar.update_yaxes(fixedrange=True, showgrid=False)
 
@@ -439,7 +402,6 @@ with tab3:
         hide_index=True
     )
 
-# PIE DE PAGINA
 st.markdown(
     "<div class='footer-box'><b>Gobierno del Estado de Guanajuato</b> | Secretaría de Derechos Humanos | M.A.P.A. 2024-2030</div>",
     unsafe_allow_html=True
