@@ -40,22 +40,34 @@ st.set_page_config(
 
 css_style = (
     "<style>"
-    ".header-box { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 55%, " + AZUL_INST + " 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,102,255,0.30); width: 100%; text-align: center; }"
+    /* FONDO GENERAL GRIS AZULADO */
+    ".stApp { background-color: #F0F4F8; }"
+    
+    /* CORRECCION: Forzar fondo transparente/gris en los contenedores de Streamlit que se quedan blancos */
+    "[data-testid='stHeader'] { background-color: transparent; }"
+    ".stTabs [data-baseweb='tab-list'] { background-color: transparent; }"
+    ".stTabs [data-baseweb='tab'] { background-color: transparent; }"
+    ".stTabs [aria-selected='true'] { background-color: transparent; border-bottom: 2px solid " + AZUL_INST + "; }"
+    "div[data-testid='stBlock'] { background-color: transparent; }"
+    
+    /* ENCABEZADOS 3D SIN DEGRADADOS */
+    ".header-box { background-color: #0055D4; color: white; padding: 22px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0px 8px 0px #003380, 0px 12px 20px rgba(0,0,0,0.25); width: 100%; text-align: center; border: 1px solid #0044AA; }"
+    
+    ".sidebar-header { background-color: #0F172A; padding: 18px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0px 6px 0px #020617, 0px 10px 15px rgba(0,0,0,0.3); border: 1px solid #1E293B; }"
+    ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
+    ".sidebar-header p { color: #CBD5E1 !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
+
+    /* TARJETAS Y CONTROLES */
     "div[data-testid='stMetric'] { border-left: 5px solid " + AZUL_INST + "; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,130,255,0.18); background-color: #ffffff; }"
     ".legend-box { padding: 10px 14px; border-radius: 8px; background-color: rgba(0, 130, 255, 0.08); border: 1px solid rgba(0, 130, 255, 0.35); margin-bottom: 10px; font-size: 14px; }"
     "h2, h3, h4 { color: " + AZUL_INST_ALT + "; font-weight: 600; }"
     ".footer-box { text-align: center; padding: 14px; margin-top: 24px; border-top: 3px solid " + AZUL_INST + "; font-size: 13px; opacity: 0.85; }"
     
     "[data-testid='stSidebar'] { background-color: #F8FAFC; border-right: 1px solid #E2E8F0; }"
-    "[data-testid='stSidebar'] h2 { color: #0F172A; font-size: 1.6rem; }"
     "[data-testid='stSidebar'] h4 { color: #334155; font-size: 1.05rem; margin-bottom: 0px; padding-bottom: 0px; }"
     "[data-testid='stSidebar'] label { color: #475569; font-weight: 600; font-size: 0.9rem; }"
     "div[data-baseweb='select'] > div, div[data-baseweb='input'] > div { background-color: #ffffff; border-radius: 8px; border: 1px solid #CBD5E1; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }"
     "[data-testid='stCheckbox'] label span { color: #475569; font-size: 0.9rem; }"
-    
-    ".sidebar-header { background: linear-gradient(90deg, " + AZUL_OSCURO + " 0%, " + AZUL_INST_ALT + " 100%); padding: 18px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }"
-    ".sidebar-header h2 { color: white !important; margin: 0 !important; font-size: 1.5rem !important; }"
-    ".sidebar-header p { color: #E6F2FF !important; margin: 6px 0 0 0 !important; font-size: 0.85rem !important; line-height: 1.3 !important; }"
     "</style>"
 )
 st.markdown(css_style, unsafe_allow_html=True)
@@ -271,13 +283,16 @@ with tab1:
             orientation="h",
             marker_color=AZUL_INST
         ))
+        
         fig_bar.update_layout(
             barmode="overlay",
             height=520,
             xaxis_title="Indice de Urgencia M.A.P.A. (0 a 100)",
             yaxis_title=None,
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-            margin={"r": 10, "t": 30, "l": 10, "b": 10}
+            margin={"r": 10, "t": 30, "l": 10, "b": 10},
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
         )
         fig_bar.update_xaxes(fixedrange=True)
         fig_bar.update_yaxes(fixedrange=True)
@@ -317,6 +332,8 @@ with tab2:
         "ANDADORES_FALTANTES", "PROTESIS_FALTANTES", "AUDIFONOS_FALTANTES"
     ]
     tabla_compras = df_m_f[cols_compras].sort_values("TOTAL_SIN_AYUDA_TECNICA", ascending=False)
+    
+    st.markdown("<style>[data-testid='stDataFrame'] { background-color: #ffffff; padding: 10px; border-radius: 8px; }</style>", unsafe_allow_html=True)
     st.dataframe(tabla_compras, use_container_width=True, hide_index=True)
 
 with tab3:
@@ -328,6 +345,8 @@ with tab3:
         "DIAGNOSTICO", "PCT_DISCAPACIDAD", "PERFIL_CLUSTER", "PROBABILIDAD_DEFICIT_IA",
         "EXCLUIDO_LABORAL_EDUCATIVO", "BARRERA_TRANSPORTE", "DEFICIT_AYUDA_TECNICA", "DEFICIT_APOYO_Y_ENTORNO"
     ]
+    
+    st.markdown("<style>[data-testid='stDataFrame'] { background-color: #ffffff; padding: 10px; border-radius: 8px; }</style>", unsafe_allow_html=True)
     st.dataframe(
         df_p_f[cols_pac].sort_values("PROBABILIDAD_DEFICIT_IA", ascending=False),
         use_container_width=True,
